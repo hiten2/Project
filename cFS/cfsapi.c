@@ -2,14 +2,17 @@
 
 #include "cfsapi.h"
 
-/* create file */
-int cfs_create_file(cFS *cfs, char *path);
+/* create file *//* not done */
+int cfs_create_file(cFS *cfs, char *path) {
+  if (cfs != NULL && path != NULL) {
+    /* pass */
+    return 1;
+  }
+  return 0;
+}
 
-/* dummy open file */
-int cfs_open_file(cFS *cfs, char *path);
-
-/* read bytes from file */
+/* read bytes from file *//* not done */
 int cfs_read(cFS *cfs, char *buffer, char *path, int lim);
 
-/* write bytes to file */
+/* write bytes to file *//* not done */
 int cfs_write(cFS *cfs, char *path, char *buffer, int lim);
