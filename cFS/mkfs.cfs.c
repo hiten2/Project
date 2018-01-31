@@ -18,6 +18,6 @@ unsigned long getfsize(FILE *fp) {
 
 void main(int argc, char *argv[]) {
   if (argc > 1) {
-    for (int i = 0; i < argc; make_cfs(argv[i++]));
+    for (int i = 0; i < argc; cfs_make(argv[i++]));
   }
 }
