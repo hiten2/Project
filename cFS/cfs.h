@@ -1,9 +1,17 @@
 /* cFS */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifndef CFS_H_
 #define CFS_H_
+
+/* cFS */
+struct cFS {
+  char *key;
+  char *keySize;
+  FILE *node;
+};
 
 /* BEGIN BYTE ORDER */
 
@@ -48,5 +56,8 @@
 
 /* get cFS long long size */
 int cfs_get_long_long_size(char *nodePath);
+
+/* resolve cFS path to a byte position */
+long long cfs_resolve_path(struct cFS, char *path);
 
 #endif
