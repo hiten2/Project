@@ -1,6 +1,9 @@
 # a basic encrypted filesystem (for now)
-*for now it includes a tree mapping area, mut maybe not even have directory trees, just files?*
-*I'm going to proceed under the assumption that there could be a tree structure, and will clarify resource access methods in the API*
+## NOTES/COMMENTARY
+### directory tree proposal
+*suppose only root directory contents were stored in the tree mapping; then one could have subdirectories stored in the body section, and they could be denoted using a flag of some kind*
+### API
+*the current API is rather simple, and has no concept of "opening" a resource; it could be extended easily, but we should make a plan as to what would be the most secure route to go by*
 
 ## general outline
 I figure we need to meet a few criteria for cFS:
@@ -30,6 +33,3 @@ bytes (variable start) (length = 1048576): tree structure mapping (for root dire
 **body**
 
 bytes (variable start) (length -> end): content
-
-### directory tree proposal
-*suppose only root directory contents were stored in the tree mapping; then one could have subdirectories stored in the body section, and they could be denoted using a flag of some kind*
