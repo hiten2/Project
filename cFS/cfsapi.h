@@ -18,6 +18,12 @@
 /* create file */
 int cfs_create_file(struct cFS *cfs, char *path);
 
+/* destroy cFS */
+int cfs_destroy(struct cFS *cfs);
+
+/* make cFS */
+int cfs_make(struct cFS *cfs);
+
 /* read bytes from file */
 int cfs_read(struct cFS *cfs, char *buffer, char *path, int lim);
 
