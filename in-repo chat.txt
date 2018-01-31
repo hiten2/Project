@@ -1,1 +1,2 @@
 H: Whattaya wanna do?  I was thinking maybe an interpreted/encrypted FS.
+H: Layed the groundwork for an FS (cFS for crypto-filesystem).  We could always do something more interesting, though.  I really don't care about scrapping it.
