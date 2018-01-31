@@ -1,4 +1,4 @@
-/* cFS macros & general layout */
+/* cFS */
 
 #include <stdio.h>
 
