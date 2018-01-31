@@ -11,23 +11,28 @@ int cfs_create_file(struct cFS *cfs, char *path) {
   return 0;
 }
 
-/* destroy cFS *//* not done */
-int cfs_destroy(struct cFS *cfs);
+/* destroy cFS */
+int cfs_destroy(struct cFS *cfs) {
+  if (cfs->node != NULL) {
+    for (int pass = 0; pass < 4; pass++) { /* make 4 passes */
+      for (int i = 0; i < cfs->size; fwrite(rand(), 1, 1, cfs->node), i++);
+    }
+  }
+}
 
-/* make cFS at the given path *//* not done */
+/* make cFS *//* not done */
 int cfs_make(struct cFS *cfs) {
-  FILE *node;
   unsigned long size;
   
-  if ((node = fopen(nodePath, "wb")) != NULL && (size = get_fsize(node)) > CFS_MIN_STORAGE_SIZE) {
-    write((char) sizeof(long long), 1, node); /* byte 1 = size of size block */
-    write(size, sizeof(long long), 1, node); /*bytes 2-size of size block = size of storage medium */
-    write(key_size, 1, sizeof(long long), node);
+  if (cfs->node != NULL && (size = get_fsize(node)) > CFS_MIN_STORAGE_SIZE) {
+    fwrite((char) sizeof(long long), 1, cfs->node);
+    fwrite(size, sizeof(long long), 1, cfs->node);
+    fwrite(key_size, 1, sizeof(long long), cfs->node);
     int i;
     
-    for (i = 0; i < CFS_LOCK_SIZE; write(i++ % 512, 1, 1, node));
+    for (i = 0; i < CFS_LOCK_SIZE; fwrite(i++ % 512, 1, 1, cfs->node));
     
-    for (i = 0; i < CFS_TREEMAP_SIZE; write('\0', 1, 1, node), i++); /* initialize tree mapping portion */
+    for (i = 0; i < CFS_ROOT_SIZE; fwrite('\0', 1, 1, cfs->node), i++);
   }
 }
 
