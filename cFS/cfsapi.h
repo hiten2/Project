@@ -14,7 +14,7 @@ typedef FILE cFS;
 
 /* open cFS */
 #undef cfs_open
-#define cfs_open(node) fopen(node, "r+");
+#define cfs_open(nodePath) fopen(nodePath, "r+")
 
 /* create file */
 int cfs_create_file(cFS *cfs, char *path);
