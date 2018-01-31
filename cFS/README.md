@@ -10,7 +10,7 @@ I figure we need to meet a few criteria for cFS:
 3. be able to verify key without storing it
 4. store resources
 
-The byte order below should meet most of those critera, except for the header size, which is interpreted a fixed.
+The byte order below should meet most of those critera, except for the header size, which is fixed.
 
 ### byte order
 **header:**
