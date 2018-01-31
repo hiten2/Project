@@ -1,6 +1,7 @@
 /* cFS API */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "cfs.h"
 
 #ifndef CFSAPI_H_
@@ -13,13 +14,6 @@
 /* open cFS */
 #undef cfs_open
 #define cfs_open(nodePath) fopen(nodePath, "r+")
-
-/* cFS outline */
-struct cFS {
-  char *key;
-  long keySize;
-  FILE *node;
-};
 
 /* create file */
 int cfs_create_file(struct cFS *cfs, char *path);
