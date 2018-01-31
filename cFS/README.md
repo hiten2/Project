@@ -5,6 +5,7 @@
 ## general outline
 ### byte order
 **header:**
+
 *let MKRHOST be the host that ran `mkfs.cfs`*
 
 byte 0: (length = 1 byte) size of `long long`
@@ -17,4 +18,9 @@ bytes (variable start) (length = 1024): "locking" mechanism (used for key valida
 
 bytes (variable start) (length = 1048576): tree structure mapping (for root directory)
 
+**body**
+
 bytes (variable start) (length -> end): content
+
+### directory tree proposal
+*suppose only root directory contents were stored in the tree mapping; then one could have subdirectories stored in the body section, and they could be denoted using a flag of some kind*
