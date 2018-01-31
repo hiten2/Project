@@ -3,10 +3,6 @@
 #ifndef CFS_H_
 #define CFS_H_
 
-/* minimum *usable* disk space required */
-#undef CFS_MIN_STORAGE_SIZE
-#define CFS_MIN_STORAGE_SIZE 4194304
-
 /* BEGIN BYTE ORDER */
 
 /* first byte represents the number of bytes used to denote the disk size */
@@ -40,5 +36,10 @@
 /* header size */
 #undef CFS_HEADER_SIZE
 #define CFS_HEADER_SIZE(long_long_size) (CFS_TREEMAP_B + CFS_TREEMAP_SIZE)
+
+
+/* minimum *usable* disk space required */
+#undef CFS_MIN_STORAGE_SIZE
+#define CFS_MIN_STORAGE_SIZE (4 * CFS_HEADER_SIZE)
 
 #endif
