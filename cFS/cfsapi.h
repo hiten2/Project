@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include "cfs.h"
 
-#ifndef CFSIO_H_
-#define CFSIO_H_
+#ifndef CFSAPI_H_
+#define CFSAPI_H_
 
 typedef FILE cFS;
 
