@@ -1,1 +1,1 @@
-a sample readme
+a basic encrypted filesystem (for now)
