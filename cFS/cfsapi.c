@@ -14,5 +14,11 @@ int cfs_create_file(cFS *cfs, char *path) {
 /* read bytes from file *//* not done */
 int cfs_read(cFS *cfs, char *buffer, char *path, int lim);
 
+/* remove file *//* not done */
+int cfs_remove_file(cFS *cfs, char *path);
+
+/* shred & remove file *//* not done */
+int cfs_sremove_file(cFS *cfs, char *path);
+
 /* write bytes to file *//* not done */
 int cfs_write(cFS *cfs, char *path, char *buffer, int lim);
