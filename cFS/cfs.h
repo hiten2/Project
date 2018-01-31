@@ -11,6 +11,8 @@ struct cFS {
   char *key;
   char *keySize;
   FILE *node;
+  char *nodePath;
+  long long nodeSize;
 };
 
 /* BEGIN BYTE ORDER */
@@ -59,5 +61,11 @@ int cfs_get_long_long_size(char *nodePath);
 
 /* resolve cFS path to a byte position */
 long long cfs_resolve_path(struct cFS, char *path);
+
+/* deletion */
+void del_cfs(struct cFS *cfs);
+
+/* initialization */
+struct cFS *init_cfs(char *nodePath, char *key, long long keySize);
 
 #endif
