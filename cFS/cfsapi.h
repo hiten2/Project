@@ -1,4 +1,4 @@
-/* cFS API handling */
+/* cFS API */
 
 #include <stdio.h>
 #include "cfs.h"
