@@ -6,7 +6,7 @@
 #ifndef CFS_H_
 #define CFS_H_
 
-/* cFS */
+/* cFS outline */
 struct cFS {
   char *key;
   char *keySize;
