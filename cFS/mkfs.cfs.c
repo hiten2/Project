@@ -29,4 +29,6 @@ int mkfs_cfs(char *nodePath) {
   if ((node = fopen(nodePath, "wb")) != NULL && (size = get_fsize(node)) > CFS_MIN_STORAGE_SIZE) {
     fwrite((char) sizeof(long long), 1, node); /* byte 1 = size of size block */
     fwrite(size, sizeof(long long), 1, node); /*bytes 2-size of size block = size of storage medium */
+    
+    for (int i = 0; i < CFS_TREEMAP_SIZE; fwrite('\0', 1, 1, node), i++); /* initialize tree mapping portion */
 }
