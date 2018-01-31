@@ -3,6 +3,15 @@
 *I'm going to proceed under the assumption that there could be a tree structure, and will clarify resource access methods in the API*
 
 ## general outline
+I figure we need to meet a few criteria for cFS:
+
+1. know device size
+2. know section sizes (header & body)
+3. be able to verify key without storing it
+4. store resources
+
+The byte order below should meet most of those critera, except for the header size, which is interpreted a fixed.
+
 ### byte order
 **header:**
 
