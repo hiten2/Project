@@ -75,6 +75,15 @@ struct cFSEntry {
 #undef CFS_MIN_STORAGE_SIZE
 #define CFS_MIN_STORAGE_SIZE (4 * CFS_HEADER_SIZE)
 
+/* extract next cFS entry position */
+long long cfs_entry_extract_next(struct cFSEntry *entry);
+
+/* extract previous cFS entry position */
+long long cfs_entry_extract_prev(struct cFSEntry *entry);
+
+/* extract cFS entry type */
+int cfs_entry_extract_type(struct cFSEntry *entry);
+
 /* get cFS long long size */
 int cfs_get_long_long_size(struct cFS *cfs);
 
