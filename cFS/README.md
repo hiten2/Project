@@ -14,6 +14,10 @@ cFS should operate fixed-length chunks; this would decrease the secondary storag
 
 I propose cFS should operate using 512-byte chunks
 
+I also propose that the following chunk formats be followed: entry, file, link, part, and directory
+
+the proposed byte order can be found below
+
 ## general outline
 I figure we need to meet a few criteria for cFS:
 
@@ -24,12 +28,12 @@ I figure we need to meet a few criteria for cFS:
 
 The byte order below should meet most of those critera, except for the header size, which is fixed.
 
-### byte order
-**header:**
-
+## byte order
+### node byte order
+#### header byte order
 *let MKRHOST be the host that ran `mkfs.cfs`*
 
-byte 0: (length = 1 byte) size of `long long`
+byte 0 (length = 1 byte): size of `long long`
 
 bytes 1 (length = size of `long long` on MKRHOST): disk size
 
@@ -39,6 +43,11 @@ bytes (variable start) (length = 1024): "locking" mechanism (used for key valida
 
 bytes (variable start) (length = 1048576): tree structure mapping (for root directory)
 
-**body**
-
+#### body byte order
 bytes (variable start) (length -> end): content
+
+### chunk byte order (512 bytes total)
+bytes 0 (length = size of `long long` on MKRHOST): address of previous part
+byte (variable start) (length = 1 byte): identifier (one of the `CFS_ENTRY_TYPE_` macros)
+bytes (variable start) (length = 511 - 2 \* (size of `long long` on MKRHOST)): content
+bytes (variable start) (length = size of `long long` on MKRHOST): address of next part
