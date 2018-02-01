@@ -1,13 +1,18 @@
 # a basic encrypted filesystem (for now)
 ## NOTES/COMMENTARY
 ### directory tree proposal
-*suppose only root directory contents were stored in the tree mapping; then one could have subdirectories stored in the body section, and they could be denoted using a flag of some kind*
+suppose only root directory contents were stored in the tree mapping; then one could have subdirectories stored in the body section, and they could be denoted using a flag of some kind
 ### API
-*the current API is rather simple, and has no concept of "opening" a resource; it could be extended easily, but we should make a plan as to what would be the most secure route to go by*
+the current API is rather simple, and has no concept of "opening" a resource; it could be extended easily, but we should make a plan as to what would be the most secure route to go by
 
 *I included two command-line tools, in addition to the C API: they are `mkfs.cfs` (for cFS creation) and `cfsapi` (for I/O operations)*
 ### directory entries
-*need to have a concrete method of interpretation: should be different for directories and files*
+need to have a concrete method of interpretation: should be different for directories and files
+
+#### directory entry proposal
+cFS should operate fixed-length chunks; this would decrease the secondary storage bottleneck
+
+I propose cFS should operate using 512-byte chunks
 
 ## general outline
 I figure we need to meet a few criteria for cFS:
