@@ -58,6 +58,7 @@ int cfs_write(struct cFS *cfs, char *path, char *buffer, int lim);
 
 /* not done */
 int main(int argc, char *argv[]) {
+  struct cFS *cfs;
   char *helpString = "cFS API extended help:\n" \
     "<node>\t- the containing node for the cFS\n" \
     "<key>\t- cFS access key\n" \
@@ -69,12 +70,13 @@ int main(int argc, char *argv[]) {
     "\twrite\t- write the bytes specified by [arg] (which may be omitted)\n" \
     "<path>\t- the path to operate on" \
     "[string]\t- an optional string used by the \"write\" operation";
+  int output = 0;
   char *usageString = "Usage: cfsapi <node> <key> <op> <path> [string]";
-    
+  
   if (argc < 5 || argc > 6) {
     puts(usageString);
   } else if (strcmp(argv[3], "create") == 0) {
-    
+    cfs_create_file(cfs = init_cfs(argv[1], argv[2], strlen(argv[2])), argv[4]);
   } else if (strcmp(argv[3], "read") == 0) {
     
   } else if (strcmp(argv[3], "remove") == 0) {
@@ -83,13 +85,18 @@ int main(int argc, char *argv[]) {
     
   } else if (strcmp(argv[3], "write") == 0) {
     
-  } else {
-    if (strcmp(argv[1], "help") != 0)
-      puts("Invalid operation.");
+  } else if (strcmp(argv[1], "help") == 0) {
     puts(usageString);
     puts(helpString);
+    return 0;
+  } else {
+    puts("Invalid operation.");
+    puts(usageString);
+    puts(helpString);
+    return 1;
   }
-  return 0;
+  del_cfs(cfs);
+  return output;
 }
 
 #endif
