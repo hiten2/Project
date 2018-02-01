@@ -54,4 +54,8 @@ int cfs_sremove_file(struct cFS *cfs, char *path);
 /* write bytes to file *//* not done */
 int cfs_write(struct cFS *cfs, char *path, char *buffer, int lim);
 
+#ifndef NOAUTO
+
 void main(int argc, char *argv[]);
+
+#endif
