@@ -65,10 +65,10 @@ int main(int argc, char *argv[]) {
     "<op>\n" \
     "\tcreate\t- create a new file at <path>\n" \
     "\tread\t- read the file at <path>\n" \
-    "\tremove\t- remove the file at <path>" \
+    "\tremove\t- remove the file at <path>\n" \
     "\tsremove\t- shred and remove the file at <path>\n" \
     "\twrite\t- write the bytes specified by [arg] (which may be omitted)\n" \
-    "<path>\t- the path to operate on" \
+    "<path>\t- the path to operate on\n" \
     "[string]\t- an optional string used by the \"write\" operation";
   int output = 0;
   char *usageString = "Usage: cfsapi <node> <key> <op> <path> [string]";
