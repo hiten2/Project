@@ -2,6 +2,19 @@
 
 #include "cfs.h"
 
+/* extract next cFS entry position *//* not done */
+long long cfs_entry_extract_next(struct cFS *cfs, struct cFSEntry *entry) {
+  if (cfs != NULL && cfs->size != NULL && entry->content != NULL)
+    return (long long) entry->content[0];
+  return -1;
+}
+
+/* extract previous cFS entry position */
+long long cfs_entry_extract_prev(struct cFSEntry *entry);
+
+/* extract cFS entry type */
+int cfs_entry_extract_type(struct cFSEntry *entry);
+
 /* get cFS long long size */
 int cfs_get_long_long_size(struct cFS *cfs) {
   int size;
