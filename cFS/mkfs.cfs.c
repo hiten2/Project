@@ -1,8 +1,10 @@
+/* mkfs utility for cFS */
+
+#define NOAUTO
+
 #include <stdio.h>
 #include "cfs.h"
 #include "cfsapi.h"
-
-/* mkfs utility for cFS */
 
 void main(int argc, char *argv[]) {
   if (argc > 1) {
