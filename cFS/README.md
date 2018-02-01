@@ -48,6 +48,9 @@ bytes (variable start) (length -> end): content
 
 ### chunk byte order (512 bytes total)
 bytes 0 (length = size of `long long` on MKRHOST): address of previous part
+
 byte (variable start) (length = 1 byte): identifier (one of the `CFS_ENTRY_TYPE_` macros)
+
 bytes (variable start) (length = 511 - 2 \* (size of `long long` on MKRHOST)): content
+
 bytes (variable start) (length = size of `long long` on MKRHOST): address of next part
