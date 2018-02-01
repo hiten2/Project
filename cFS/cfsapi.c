@@ -73,11 +73,21 @@ int main(int argc, char *argv[]) {
     
   if (argc < 5 || argc > 6) {
     puts(usageString);
-  } else if (strcmp(argv[1], "help") == 0) {
+  } else if (strcmp(argv[3], "create") == 0) {
+    
+  } else if (strcmp(argv[3], "read") == 0) {
+    
+  } else if (strcmp(argv[3], "remove") == 0) {
+    
+  } else if (strcmp(argv[3], "sremove") == 0) {
+    
+  } else if (strcmp(argv[3], "write") == 0) {
+    
+  } else {
+    if (strcmp(argv[1], "help") != 0)
+      puts("Invalid operation.");
     puts(usageString);
     puts(helpString);
-  } else {
-    /* evaluate arguments */
   }
   return 0;
 }
