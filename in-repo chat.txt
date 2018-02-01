@@ -1,3 +1,4 @@
 H: Whattaya wanna do?  I was thinking maybe an interpreted/encrypted FS.
 H: Layed the groundwork for an FS (cFS for crypto-filesystem).  We could always do something more interesting, though.  I really don't care about scrapping it.
 O: I think that we could start with a fil system and then if we get bored, we can always move on to something else.
+H: sounds good.  which languages are you familiar with?  I'm doing it in C so far, but we could definitely write the API in another language.
