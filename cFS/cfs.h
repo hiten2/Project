@@ -57,10 +57,13 @@ struct cFS {
 #define CFS_MIN_STORAGE_SIZE (4 * CFS_HEADER_SIZE)
 
 /* get cFS long long size */
-int cfs_get_long_long_size(char *nodePath);
+int cfs_get_long_long_size(struct cFS *cfs);
+
+/* get cFS node size */
+int cfs_get_size(struct cFS *cfs);
 
 /* resolve cFS path to a byte position */
-long long cfs_resolve_path(struct cFS, char *path);
+long long cfs_resolve_path(struct cFS *cfs, char *path);
 
 /* deletion */
 void del_cfs(struct cFS *cfs);
