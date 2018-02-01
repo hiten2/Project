@@ -15,6 +15,20 @@ struct cFS {
   long long nodeSize;
 };
 
+/* entry outline */
+struct cFSEntry {
+  int mode; /* can be a file, directory, or a link */
+  long long next; /* position of next block in the entry or -1 */
+  unsigned long long pos; /* position of the entry in the node */
+};
+
+/* root outline */
+struct cFSRoot {
+  cFSEntry *entries;
+  unsigned long long nEntries;
+  unsigned long long size;
+};
+
 /* BEGIN BYTE ORDER */
 
 /* number of bytes used to represent a long long */
