@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifndef CFS_H_
 #define CFS_H_
@@ -75,6 +76,9 @@ struct cFSEntry {
 #undef CFS_MIN_STORAGE_SIZE
 #define CFS_MIN_STORAGE_SIZE (4 * CFS_HEADER_SIZE)
 
+/* atol expansion for architecture-independent long long interpretation */
+long long cfs_atol(struct cFS *cfs, char *start)
+  
 /* extract next cFS entry position */
 long long cfs_entry_extract_next(struct cFSEntry *entry);
 
