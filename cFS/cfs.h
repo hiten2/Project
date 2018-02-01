@@ -16,17 +16,22 @@ struct cFS {
 };
 
 /* entry outline */
-struct cFSEntry {
+struct cFSEntryOLD {
   int mode; /* can be a file, directory, or a link */
   long long next; /* position of next block in the entry or -1 */
   unsigned long long pos; /* position of the entry in the node */
 };
 
 /* root outline */
-struct cFSRoot {
+struct cFSRootOLD {
   cFSEntry *entries;
   unsigned long long nEntries;
   unsigned long long size;
+};
+
+/* entry outline */
+struct cFSEntry {
+  char chunk[512];
 };
 
 /* BEGIN BYTE ORDER */
