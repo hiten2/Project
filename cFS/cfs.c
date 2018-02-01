@@ -16,3 +16,18 @@ int cfs_get_long_long_size(char *nodePath) {
   }
   return size;
 }
+
+/* resolve cFS path to a byte position *//* not done */
+long long cfs_resolve_path(struct cFS, char *path);
+
+/* deletion */
+void del_cfs(struct cFS *cfs) {
+  if (cfs != NULL) {
+    fclose(cfs->node);
+    free(cfs);
+    cfs = NULL;
+  }
+}
+
+/* initialization *//* not done */
+struct cFS *init_cfs(char *nodePath, char *key, long long keySize);
