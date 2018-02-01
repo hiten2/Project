@@ -22,17 +22,23 @@ int cfs_destroy(struct cFS *cfs) {
 
 /* make cFS *//* not done */
 int cfs_make(struct cFS *cfs) {
-  unsigned long size;
-  
-  if (cfs->node != NULL && (size = get_fsize(node)) > CFS_MIN_STORAGE_SIZE) {
-    fwrite((char) sizeof(long long), 1, cfs->node);
-    fwrite(size, sizeof(long long), 1, cfs->node);
-    fwrite(key_size, 1, sizeof(long long), cfs->node);
-    int i;
+  if (cfs->node != NULL) {
+    unsigned long long size, cur;
+    cur = ftell(cfs->node);
+    fseek(cfs->node, 0, SEEK_END);
+    size = ftell(cfs->node);
+    fseek(cfs->node, cur, SEEK_SET);
     
-    for (i = 0; i < CFS_LOCK_SIZE; fwrite(i++ % 512, 1, 1, cfs->node));
-    
-    for (i = 0; i < CFS_ROOT_SIZE; fwrite('\0', 1, 1, cfs->node), i++);
+    if (size > CFS_MIN_STORAGE_SIZE) {
+      fwrite((char) sizeof(long long), 1, cfs->node); /* sizeof(long long) */
+      fwrite(size, sizeof(long long), 1, cfs->node); /* node size */
+      fwrite(key_size, 1, sizeof(long long), cfs->node); /* key size */
+      int i;
+      
+      for (i = 0; i < CFS_LOCK_SIZE; fwrite(i++ % 512, 1, 1, cfs->node)); /* "lock" */
+      
+      for (i = 0; i < CFS_ROOT_SIZE; fwrite('\0', 1, 1, cfs->node), i++); /* root */
+    }
   }
 }
 
