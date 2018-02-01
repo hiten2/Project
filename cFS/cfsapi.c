@@ -56,6 +56,23 @@ int cfs_write(struct cFS *cfs, char *path, char *buffer, int lim);
 
 #ifndef NOAUTO
 
-void main(int argc, char *argv[]);
+/* not done */
+int main(int argc, char *argv[]) {
+  char *helpString = "Usage: cfsapi <node> <op> <path> [arg]"; /* should have a key option */
+  char *extHelpString = "cFS API extended help:\n" \
+    "<node>\t- the containing node for the cFS\n" \
+    "<op>\n" \
+    "\tcreate\t- create a new file at <path>\n" \
+    "\tread\t- read the file at <path>\n" \
+    "\tremove\t- remove the file at <path>" \
+    "\tsremove\t- shred and remove the file at <path>\n" \
+    "\twrite\t- write the bytes specified by [arg] (which may be omitted)\n" \
+    "<path>\t- the path to operate on" \
+    "[arg]\t- the optional argument";
+  char *target;
+  
+  
+  return 0;
+}
 
 #endif
