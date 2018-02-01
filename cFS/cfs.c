@@ -2,6 +2,17 @@
 
 #include "cfs.h"
 
+/* atol expansion for architecture-independent long long interpretation */
+long long cfs_atol(struct cFS *cfs, char *start) {
+  if (cfs != NULL && start != NULL) {
+    char copy[cfs->longLongSize + 1];
+    strncpy(copy, start, cfs->longLongSize);
+    copy[cfs->longLongSize - 1] = '\0';
+    return atol(copy);
+  }
+  reutrn -1;
+}
+
 /* extract next cFS entry position *//* not done */
 long long cfs_entry_extract_next(struct cFS *cfs, struct cFSEntry *entry) {
   if (cfs != NULL && cfs->size != NULL && entry->content != NULL)
