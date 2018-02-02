@@ -16,6 +16,7 @@ class cFS:
     to be discussed
     """
     """maybe we should have classes for each entry type, and use those to interact with this class"""
+    """we should also have an on-disk doubly linked list data structure"""
     CFS_INT_SIZE = 8 # number of bytes used to store an integer on disk
     
     def __init__(self, node_path):
@@ -26,22 +27,6 @@ class cFS:
     
     def create(self, path, mode = ENTRY_TYPES["file"]):
         """create a resource"""
-        pass
-    
-    def _create_dir(self, path):
-        """create a directory"""
-        pass
-    
-    def _create_file(self, path):
-        """create a file"""
-        pass
-    
-    def _create_link(self, path):
-        """create a link"""
-        pass
-    
-    def _create_part(self, path):
-        """create a part"""
         pass
     
     def read(self, path):
