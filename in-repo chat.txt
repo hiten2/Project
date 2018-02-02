@@ -4,3 +4,4 @@ O: I think that we could start with a fil system and then if we get bored, we ca
 H: sounds good.  which languages are you familiar with?  I'm doing it in C so far, but we could definitely write the API in another language.
 O: Hm, I would have a pretty steep learning curve for C since I have no expierence at all. Id be happy to do python though because although I dont know a lot, I can catch up as we go along. Of course I know some java too but I think that would likely not be a very fun language to work on this in. I am not very multi-lingual unfortunately.
 H: Yeah, Java just plain sucks.  I'm cool with migrating to Python, and I'll move the C version to a subdirectory.
+H: Added a layout to build on with Python.
