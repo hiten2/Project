@@ -28,8 +28,24 @@ class cFS:
         """create a resource"""
         pass
     
+    def _create_dir(self, path):
+        """create a directory"""
+        pass
+    
+    def _create_file(self, path):
+        """create a file"""
+        pass
+    
+    def _create_link(self, path):
+        """create a link"""
+        pass
+    
+    def _create_part(self, path):
+        """create a part"""
+        pass
+    
     def read(self, path):
-        """read a file"""
+        """read a reource"""
         pass
     
     def remove(self, path):
