@@ -8,7 +8,17 @@ sys.path.append(os.path.realpath(__file__))
 import .diskutil as diskutil # methods for encoding ints and longs as strings
 
 class DiskDLL:
-  LONG_LONG_SIZE = diskutil.
+  BLOCK_SIZE = 512 # how large each "node" on disk should be
+  LONG_LONG_SIZE = diskutil.LONG_LONG_SIZE
+  """
+  a doubly-linked list stored on disk
+  ---------
+  an idea for the structure of each node:
+  0                                                                          512
+  |   LONG_LONG_SIZE  | BLOCK_SIZE - (2 * LONG_LONG_SIZE) |  LONG_LONG_SIZE   |
+  V                   V                                   V                   V
+  [ previous address  |                data               |    next address   ]
+  """
   
   def __init__(self, pos):
     self.pos = pos # pointer to "entry" node
