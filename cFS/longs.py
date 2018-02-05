@@ -1,5 +1,7 @@
 """long stuff"""
 
+__package__ = "cfs"
+
 import sys
 
 global LONG_SIZE # Python longs have infinite precision, so this is a generalization
