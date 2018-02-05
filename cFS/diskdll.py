@@ -3,6 +3,7 @@
 __package__ = "cfs"
 
 import .longs as longs # methods for encoding ints and longs as strings
+import os
 
 class DiskDLL:
   BLOCK_SIZE = 512 # how large each "node" on disk should be
