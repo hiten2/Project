@@ -1,5 +1,7 @@
 """disk stuff"""
 
+__package__ = "cfs"
+
 import os
 
 def get_file_size(fp, quiet = False):
