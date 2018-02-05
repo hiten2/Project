@@ -1,5 +1,8 @@
 """cFS internals"""
 
+__package__ = "cfs"
+
+from .cfsheader import cFSHeader
 import os
 
 global ENTRY_TYPES
