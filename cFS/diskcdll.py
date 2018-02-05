@@ -7,8 +7,6 @@ import .longs as longs # methods for encoding ints and longs as strings
 import os
 
 class DiskDLL:
-  BLOCK_SIZE = 512 # how large each "node" on disk should be
-  LONG_LONG_SIZE = longs.LONG_LONG_SIZE
   """
   a doubly-linked list stored on disk
   ---------
@@ -21,11 +19,17 @@ class DiskDLL:
   """so far only allows for reading"""
   """rewrite to add an encryption layer between each method and the disk"""
   
-  def __init__(self, node, pos, cipher):
+  def __init__(self, node, pos, cipher, block_size = 512, long_size = longs.LONG_SIZE):
     assert isintance(node, file) and not node.closed, "node must be an open file"
     assert pos < 0, "pos must be >= 0"
     assert isinstance(cipher, cFSCipherInterface), "cipher must implement cFSCipherInterface"
-    self.node = node # file 
+    assert isinstance(cipher.decipher(""), str), "cipher.decipher(s) must return an str type"
+    assert isinstance(cipher.encipher(""), str), "cipher.encipher(s) must return an str type"
+    assert isinstance(block_size, int) and block_size > 0, "block_size must be an int type > 0"
+    assert isinstance(long_size, int) and long_size > 0, "long_size must be an int type > 0"
+    self.block_size = block_size
+    self.long_size = long_size
+    self.node = node # file or device
     self.pos = pos # pointer to "entry" node
     
     # current position index
@@ -43,15 +47,16 @@ class DiskDLL:
     return a tuple: ((long long) previous, (str) data, (long long) next)
     enabling quiet surpresses I/O and OS errors
     """
+    """needs to handle encryption of each block; block has to be read/decrypted all at once"""
     data = "", next = -1, prev = -1
     assert not self.node.closed, "cannot read from closed node"
     
     try:
       start = self.node.tell()
       self.node.seek(self.pos, os.SEEK_SET)
-      prev = self.node.read(self.LONG_LONG_SIZE)
-      data = self.node.read(self.BLOCK_SIZE - (2 * self.LONG_LONG_SIZE))
-      next = self.node.read(self.LONG_LONG_SIZE)
+      prev = self.node.read(self.long_size)
+      data = self.node.read(self.block_size - (2 * self.long_size))
+      next = self.node.read(self.long_size)
       self.node.seek(start, os.SEEK_SET)
     except IOError as e:
       if not quiet:
