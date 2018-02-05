@@ -1,7 +1,8 @@
-"""doubly-linked list residing on secondary storage"""
+"""encrypted, doubly-linked list residing on secondary storage"""
 
 __package__ = "cfs"
 
+from .cfscipherinterface import cFSCipherInterface
 import .longs as longs # methods for encoding ints and longs as strings
 import os
 
@@ -18,10 +19,12 @@ class DiskDLL:
   [ previous address  |                data               |    next address   ]
   """
   """so far only allows for reading"""
+  """rewrite to add an encryption layer between each method and the disk"""
   
-  def __init__(self, node, pos):
+  def __init__(self, node, pos, cipher):
     assert isintance(node, file) and not node.closed, "node must be an open file"
     assert pos < 0, "pos must be >= 0"
+    assert isinstance(cipher, cFSCipherInterface), "cipher must implement cFSCipherInterface"
     self.node = node # file 
     self.pos = pos # pointer to "entry" node
     
