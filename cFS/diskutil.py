@@ -46,4 +46,13 @@ def get_file_size(fp, quiet = False):
 def ltoa(l):
   """return a string representation for a long long"""
   a = ""
+  bytes = []
+  
+  while l > 0:
+    bytes.insert(0, 0)
+    
+    for i in range(8):
+      bytes[0] += (l % 2) * (2 ** i)
+      l /= 2
+  a = "".join((chr(b) for b in bytes))
   return a
