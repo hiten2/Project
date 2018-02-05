@@ -1,9 +1,6 @@
 """doubly-linked list residing on secondary storage"""
 
-import os
-import sys
-
-sys.path.append(os.path.realpath(__file__))
+__package__ = "cfs"
 
 import .longs as longs # methods for encoding ints and longs as strings
 
