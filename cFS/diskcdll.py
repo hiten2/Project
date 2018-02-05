@@ -11,7 +11,7 @@ class DiskDLL:
   a doubly-linked list stored on disk
   ---------
   an idea for the structure of each node:
-  0                                                                          512
+  0                                                                          block size (defaults to 512)
   |   LONG_LONG_SIZE  | BLOCK_SIZE - (2 * LONG_LONG_SIZE) |  LONG_LONG_SIZE   |
   V                   V                                   V                   V
   [ previous address  |                data               |    next address   ]
