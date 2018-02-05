@@ -5,11 +5,11 @@ import sys
 
 sys.path.append(os.path.realpath(__file__))
 
-import .diskutil as diskutil # methods for encoding ints and longs as strings
+import .longs as longs # methods for encoding ints and longs as strings
 
 class DiskDLL:
   BLOCK_SIZE = 512 # how large each "node" on disk should be
-  LONG_LONG_SIZE = diskutil.LONG_LONG_SIZE
+  LONG_LONG_SIZE = longs.LONG_LONG_SIZE
   """
   a doubly-linked list stored on disk
   ---------
@@ -60,7 +60,7 @@ class DiskDLL:
         raise e
     except Exception as e:
       raise e # raise all other exceptions
-    return diskutil.atol(prev), data, diskutil.atol(next)
+    return longs.atol(prev), data, longs.atol(next)
   
   def prev(self):
     """return string encapsulated by previous node and decrease pointer"""
