@@ -1,4 +1,6 @@
-"""cFS cipher interface"""
+"""
+cFS cipher interface:
+all ciphers cFS uses should implement this"""
 
 __package__ = "cfs"
 
