@@ -28,6 +28,7 @@ class DiskDLL:
     assert isinstance(block_size, int) and block_size > 0, "block_size must be an int type > 0"
     assert isinstance(long_size, int) and long_size > 0, "long_size must be an int type > 0"
     self.block_size = block_size
+    self.cipher = cipher
     self.long_size = long_size
     self.node = node # file or device
     self.pos = pos # pointer to "entry" node
@@ -47,16 +48,16 @@ class DiskDLL:
     return a tuple: ((long long) previous, (str) data, (long long) next)
     enabling quiet surpresses I/O and OS errors
     """
-    """needs to handle encryption of each block; block has to be read/decrypted all at once"""
     data = "", next = -1, prev = -1
     assert not self.node.closed, "cannot read from closed node"
     
     try:
       start = self.node.tell()
       self.node.seek(self.pos, os.SEEK_SET)
-      prev = self.node.read(self.long_size)
-      data = self.node.read(self.block_size - (2 * self.long_size))
-      next = self.node.read(self.long_size)
+      raw = self.cipher.decipher(self.node.read(self.block_size))
+      prev = raw[0], next = raw[-1]
+      data = raw[1:-1]
+      ####needs to securely delete raw
       self.node.seek(start, os.SEEK_SET)
     except IOError as e:
       if not quiet:
