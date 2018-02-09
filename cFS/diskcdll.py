@@ -57,7 +57,7 @@ class DiskDLL:
       raw = self.cipher.decipher(self.node.read(self.block_size))
       prev = raw[0], next = raw[-1]
       data = raw[1:-1]
-      ####needs to securely delete raw
+      #### needs to securely delete raw
       self.node.seek(start, os.SEEK_SET)
     except IOError as e:
       if not quiet:
