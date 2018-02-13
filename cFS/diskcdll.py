@@ -6,6 +6,13 @@ from .cfscipherinterface import cFSCipherInterface
 import .longs as longs # methods for encoding ints and longs as strings
 import os
 
+def shred(bytearr):
+  """shred a bytearray's contents"""
+  rand = os.urandom(len(bytearr))
+
+  for i in range(len(bytearr)):
+    bytearr[i] = rand[i]
+
 class DiskDLL:
   """
   a doubly-linked list stored on disk
@@ -54,10 +61,11 @@ class DiskDLL:
     try:
       start = self.node.tell()
       self.node.seek(self.pos, os.SEEK_SET)
-      raw = self.cipher.decipher(self.node.read(self.block_size))
+      raw = self.cipher.decipher(bytearray(self.node.read(self.block_size)))
       prev = raw[0], next = raw[-1]
       data = raw[1:-1]
-      #### needs to securely delete raw
+      shred(raw) # shreds raw data in-place
+      del raw
       self.node.seek(start, os.SEEK_SET)
     except IOError as e:
       if not quiet:
