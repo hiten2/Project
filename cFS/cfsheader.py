@@ -2,8 +2,8 @@
 
 __package__ = "cfs"
 
-import .diskutil as diskutil
-import .longs as longs
+from .diskutil import *
+from .longs import *
 
 class cFSHeader:
   pass
