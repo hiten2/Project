@@ -5,6 +5,8 @@
 3. determine a logical structure for a cFS object and its encryption standard, then optimize it for efficiency
 4. compile using Cython into a shared object library
 **note that security can be compromised by the cipher implementation**
+General layout follows inode structure (see below), although node are stores as doubly-linked lists.
+![](tmp.png?raw=true)
 
 # REVISED abstract data type (ADT)
 *please note that there is no concept for a link; links are represented in a cFSDirectory-formatted list*
