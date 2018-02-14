@@ -3,7 +3,7 @@
 __package__ = "cfs"
 
 from .cfscipherinterface import cFSCipherInterface
-import .longs as longs # methods for encoding ints and longs as strings
+from .longs import LONG_SIZE, atol, ltoa # methods for encoding ints and longs as strings
 import os
 
 def shred(bytearr):
@@ -26,7 +26,7 @@ class DiskDLL:
   """so far only allows for reading"""
   """rewrite to add an encryption layer between each method and the disk"""
   
-  def __init__(self, node, pos, cipher, block_size = 512, long_size = longs.LONG_SIZE):
+  def __init__(self, node, pos, cipher, block_size = 512, long_size = LONG_SIZE):
     assert isintance(node, file) and not node.closed, "node must be an open file"
     assert pos < 0, "pos must be >= 0"
     assert isinstance(cipher, cFSCipherInterface), "cipher must implement cFSCipherInterface"
@@ -55,7 +55,9 @@ class DiskDLL:
     return a tuple: ((long long) previous, (str) data, (long long) next)
     enabling quiet surpresses I/O and OS errors
     """
-    data = "", next = -1, prev = -1
+    data = ""
+    next = -1
+    prev = -1
     assert not self.node.closed, "cannot read from closed node"
     
     try:
@@ -75,7 +77,7 @@ class DiskDLL:
         raise e
     except Exception as e:
       raise e # raise all other exceptions
-    return longs.atol(prev), data, longs.atol(next)
+    return atol(prev), data, atol(next)
   
   def prev(self):
     """return string encapsulated by previous node and decrease pointer"""
