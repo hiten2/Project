@@ -22,7 +22,7 @@ def atol(a):
   for byte in range(len(bytes) - 1, -1, -1):
     for bit in bytes[byte]:
       if bit:
-        l += ((long) 2) ** bit # ensure long precision
+        l += long(2) ** bit # ensure long precision
       i += 1
     return l
   
