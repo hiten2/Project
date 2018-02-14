@@ -7,7 +7,7 @@
 
 **note that security can be compromised by the cipher implementation**
 
-*General layout follows inode structure (see below), although node are stores as doubly-linked lists.*
+*General layout follows inode structure (see below), although nodes are actually doubly-linked lists.*
 ![](tmp.png?raw=true)
 
 # REVISED abstract data type (ADT)
