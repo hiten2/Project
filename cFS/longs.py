@@ -1,4 +1,4 @@
-"""long stuff"""
+"""compressed long stuff (human-unfriendly)"""
 """not done"""
 __package__ = "cfs"
 
@@ -20,8 +20,9 @@ def atol(a):
   
   for byte in range(len(bytes) - 1, -1, -1):
     for bit in bytes[byte]:
-      if bit:
-        l += long(2) ** int(bit) # ensure long precision
+      if int(bit):
+        print [bytes[byte], i]
+        l += long(2) ** int(i) # ensure long precision
       i += 1
   return l
 
