@@ -1,5 +1,5 @@
-"""compressed long stuff (human-unfriendly)"""
-"""not done"""
+"""compressed longs (base 256) (human-unfriendly)"""
+
 __package__ = "cfs"
 
 import sys
@@ -8,36 +8,22 @@ global LONG_SIZE # Python longs have infinite precision, so this is a generaliza
 
 def atol(a):
   """return a long long representation for a string"""
+  a = [ord(c) for c in a]
+  a.reverse()
   l = 0L
-  
-  # convert to little endian first
-  # so conversion can be done in a cleaner iterative fashion
-  bytes = []
-  
-  for c in a:
-    bytes.append(bin(ord(c))[2:][::-1])
-  i = 0
-  
-  for byte in range(len(bytes) - 1, -1, -1):
-    for bit in bytes[byte]:
-      if int(bit):
-        print [bytes[byte], i]
-        l += long(2) ** int(i) # ensure long precision
-      i += 1
+
+  for i, d in enumerate(a):
+    l += d * (256 ** i)
   return l
 
 def ltoa(l):
   """return a string representation for a long long"""
-  a = ""
-  bytes = []
+  a = []
   
   while l > 0:
-    bytes.insert(0, 0)
-    
-    for i in range(8):
-      bytes[0] += (l % 2) * (2 ** i)
-      l /= 2
-  a = "".join((chr(b) for b in bytes))
-  return a
+    a.append(chr(l % 256))
+    l /= 256
+  a.reverse()
+  return "".join(a)
 
 LONG_SIZE = len(ltoa(sys.maxint + 1))

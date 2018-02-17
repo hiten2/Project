@@ -1,7 +1,7 @@
 # cFS (a basic encrypted filesystem)
 ## development plan
 1. ~~solidify `diskutil.py` to be able to perform disk-related operations and atol/ltoa conversions~~
-2. fix bugs in `longs.py` (so that tests in `../cfstest.py` are successful)
+2. ~~fix bugs in `longs.py` (so that tests in `../cfstest.py` are successful)~~
 3. finish `diskcdll.py`, and make sure that it is able to store an encrypted doubly linked list on disk
 4. determine a logical structure for a cFS object and its encryption standard, then optimize it for efficiency
 5. compile using Cython into a shared object library
