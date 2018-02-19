@@ -8,10 +8,56 @@
 
 **note that security can be compromised by the cipher implementation**
 
+**we should add a format operation--maybe rethink structure?**
+
 *General layout follows inode structure (see below), although nodes are actually doubly-linked lists.*
 ![](tmp.png?raw=true)
 
-# REVISED abstract data type (ADT)
+# **NEW** REVISED ADT
+## cFS class
+### attr
+cipher
+header
+inode tree
+node
+### func
+change encryption (cipher and/or key)
+format
+make directory
+make file
+
+## InodeTree
+### attr
+block size
+position
+root node
+### func
+enter directory
+list directories
+resize inode (automatically/manually expand/contract)
+
+## Inode
+### attr
+mode
+### func
+automatically parse chunk
+automatically parse expanded
+parse directory chunk
+parse expanded directory
+parse file chunk
+parse expanded file
+
+~~
+## Header
+### attr
+key_size
+long_size
+vericode
+### func
+~~
+
+~~
+# **OLD** REVISED abstract data type (ADT)
 *please note that there is no concept for a link; links are represented in a cFSDirectory-formatted list*
 ## cFS class
 *the main API*
@@ -49,3 +95,4 @@ general I/O
 disk-based linked list
 ### methods
 general I/O
+~~

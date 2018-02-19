@@ -9,3 +9,4 @@ H: just put in a new readme, which outlines the development plan; feel free to c
 O: Hey I am so sorry i was awol for so long just finished 4 midterms in 6 days:/
 O: I am still looking over stuff and trying to understand it all so I havent actually added anything. I will be back soon to continue looking over stuff after my lab.
 H: It's totally cool.  Luckily my midterms haven't started yet.  What I'e got so far is just my best guess as to the structure of a filesystem.
+H: I had some issues with the layout.  We should Skype and figure out a structure.  When are you available?
