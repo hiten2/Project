@@ -1,0 +1,91 @@
+# **NEW** REVISED (working) ADT
+## cFS class
+### attr
+cipher
+header
+inode tree
+node
+### func
+change encryption (cipher and/or key)
+format
+make directory
+make file
+
+## InodeTree
+### attr
+block size
+position
+root node
+### func
+enter directory
+exit directory (`cd ..`)
+list directories
+
+## InodeList
+### attr
+entry inode
+### func
+general I/O
+
+## Inode
+### attr
+mode
+### func
+automatically parse chunk
+automatically parse expanded
+modify directory
+parse directory chunk
+parse expanded directory
+parse file chunk
+parse expanded file
+resize inode (automatically/manually expand/contract)
+
+~~
+## Header
+### attr
+key_size
+long_size
+vericode
+### func
+~~
+
+~~
+# **OLD** REVISED abstract data type (ADT)
+*please note that there is no concept for a link; links are represented in a cFSDirectory-formatted list*
+## cFS class
+*the main API*
+### attributes
+header
+key
+root directory
+node
+### methods
+general I/O
+key change
+
+## cFSHeader class
+*stores encryption and size information*
+### attributes
+block size
+cipher
+long long size
+### methods
+key change
+key validation
+
+## cFSDirectory class
+*a cFS directory*
+### attributes
+block size
+disk-based linked list
+position
+### methods
+general I/O
+
+## cFSFile class
+*a cFS file*
+### attributes
+disk-based linked list
+### methods
+general I/O
+~~
