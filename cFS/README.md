@@ -13,7 +13,21 @@
 *General layout follows inode structure (see below), although nodes are actually doubly-linked lists.*
 ![](tmp.png?raw=true)
 
-# **NEW** REVISED ADT
+# structure
+**a cFS instance is inode-based:**
+- there is a header containing cryptographic information & size constraints
+- there's an entry inode (first inode of the root directory)
+- within the entry inode (and subsequent directory inodes) are SHA-256/inode number (logical order) pairs (these represent containment and links)
+- the inode is prefixed and suffixed by previous and next signed inode numbers
+- the second item stored on an inode is its mode (file/directory)
+- each inode is separately encrypted (this makes cryptanalysis more difficult and reduces block/stream-based corruption in inode chains)
+**to summarize:**
+header: *key & sizes*
+inodes: *signed previous inode, mode, content, signed next inode*; **inodes are individually encrypted**
+root & directory inode content: *SHA-256/signed inode pairs*
+file inode content: *raw data*
+
+# **NEW** REVISED (working) ADT
 ## cFS class
 ### attr
 cipher
@@ -33,8 +47,14 @@ position
 root node
 ### func
 enter directory
+exit directory (`cd ..`)
 list directories
-resize inode (automatically/manually expand/contract)
+
+## InodeList
+### attr
+entry inode
+### func
+general I/O
 
 ## Inode
 ### attr
@@ -42,10 +62,12 @@ mode
 ### func
 automatically parse chunk
 automatically parse expanded
+modify directory
 parse directory chunk
 parse expanded directory
 parse file chunk
 parse expanded file
+resize inode (automatically/manually expand/contract)
 
 ~~
 ## Header
