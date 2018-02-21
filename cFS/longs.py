@@ -27,3 +27,11 @@ def ltoa(l):
     return "".join(a)
 
 LONG_SIZE = len(ltoa(sys.maxint + 1))
+
+def ltopa(l, length = LONG_SIZE):
+    """pad ltoa's output with nulls if less than the length"""
+    a = ltoa(l)
+
+    if len(a) < length:
+        return ("\x00" * (length - len(a))) + a
+    return a

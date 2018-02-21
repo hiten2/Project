@@ -1,6 +1,6 @@
 """preserved I/O"""
 
-__package__ ="cfs"
+__package__ = "cfs"
 
 import os
 

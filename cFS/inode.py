@@ -68,10 +68,12 @@ class Inode:
             raise e
         
         try:
-            self.prev_index = longs.atol(self.pio._raw_func(file.read, self.addr_size)) # read prev
-            self.mode = longs.atol(self.pio._raw_func(file.read, self.addr_size)) # read mode
-            self.pio._raw_func(file.readinto, arr) # read content
-            self.next_index = longs.atol(self.pio._raw_func(file.read, self.addr_size)) # read next
+            # read prev, mode, content, next
+            
+            self.prev_index = longs.atol(self.pio._raw_func(file.read, self.addr_size))
+            self.mode = longs.atol(self.pio._raw_func(file.read, self.addr_size))
+            self.pio._raw_func(file.readinto, arr)
+            self.next_index = longs.atol(self.pio._raw_func(file.read, self.addr_size))
             self.pio.__exit__()
         except Exception as e:
             try:
@@ -92,10 +94,12 @@ class Inode:
             raise e
         
         try:
-            self.pio._raw_func(file.write, longs.ltoa(self.prev_index)) # write prev
-            self.pio._raw_func(file.write, longs.ltoa(self.mode)) # write mode
-            self.pio._raw_func(file.write, arr) # write content
-            self.pio._raw_func(file.write, longs.;toa(self.next_index)) # write next
+            # write prev, mode, content, and next
+            
+            self.pio._raw_func(file.write, longs.ltopa(self.prev_index, self.addr_size))
+            self.pio._raw_func(file.write, longs.ltopa(self.mode, self.addr_size))
+            self.pio._raw_func(file.write, arr)
+            self.pio._raw_func(file.write, longs.ltopa(self.next_index, self.addr_size))
             self.pio.__exit__()
         except Exception as e:
             try:
