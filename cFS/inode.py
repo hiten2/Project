@@ -2,7 +2,10 @@
 
 __package__ = "cfs"
 
+import cipherinterface
+import dummycipher
 import longs
+import memshred
 import preservedio
 import os
 
@@ -22,9 +25,12 @@ class Inode:
     dull interface for inode I/O and chain traversal
     an inode can't be linked to the zeroth inode as it is reserved
     """
-    def __init__(self, node, index, addr_size = longs.LONG_SIZE, size = INODE_SIZE):
+    def __init__(self, node, index, addr_size = longs.LONG_SIZE, size = INODE_SIZE,
+            cipher = dummycipher.DummyCipher()):
         assert type(size) in (int, long) and addr_size > 0 and size > 3 * addr_size, "*size must be a positive integer > 3 * addr_size"
+        assert isinstance(cipher, cipherinterface.CipherInterface), "cipher must be a cipherinterface.CipherInterface instance"
         self.addr_size = addr_size
+        self.cipher = cipher
         self.index = index
         self.pio = preservedio.PreservedIO(node, self.position * self.size) # wrapper for node
         self.size = size
@@ -33,7 +39,7 @@ class Inode:
         self.next_index = UNKNOWN
         self.prev_index = UNKNOWN
         
-        self.read() # initializes prev/next from node
+        self.read() # initializes node from disk
 
     def format(self):
         """reset the whole inode"""
@@ -49,37 +55,33 @@ class Inode:
             return Inode(self.pio.node, self.next_index, self.addr_size, self.size)
         return None
 
-    def next(self):
+    def prev(self):
         """return the previous inode or None"""
         if not self.prev_index == UNKNOWN:
             return Inode(self.pio.node, self.prev_index, self.addr_size, self.size)
         return None
     
-    def read(self, arr = None):
-        """read the inode contents into a bytearray"""
-        if arr:
-            assert len(arr) == self.size - (3 * self.addr-size)), "arr must be of the appropriate size"
-        else:
-            arr = bytearray("\x00" * self.size - (3 * self.addr-size))
+    def read(self):
+        """read the inode contents"""
+        try:
+            # decipher
 
-        try:
-            self.pio.__enter__()
-        except Exception as e:
-            raise e
-        
-        try:
-            # read prev, mode, content, next
+            raw = self.cipher.decipher(self.pio.func(file.read, self.size))
             
-            self.prev_index = longs.atol(self.pio._raw_func(file.read, self.addr_size))
-            self.mode = longs.atol(self.pio._raw_func(file.read, self.addr_size))
-            self.pio._raw_func(file.readinto, arr)
-            self.next_index = longs.atol(self.pio._raw_func(file.read, self.addr_size))
-            self.pio.__exit__()
+            # unpack prev, mode, content, and next
+            
+            self.prev_index = longs.atol(raw[:self.addr_size])
+            self.mode = longs.atol(raw[self.addr_size:2 * self.addr_size])
+            arr = bytearray(raw[2 * self.addr_size:-self.addr_size])
+            self.next_index = longs.atol(raw[-self.addr_size:])
+
+            # clean
+
+            memshred.memshred(raw)
+            
+            del raw
+            
         except Exception as e:
-            try:
-                self.pio.__exit__()
-            except Exception as ee:
-                raise ee
             raise e
         return arr
 
@@ -87,23 +89,29 @@ class Inode:
         """write a bytearray into the inode"""
         if not arr:
             arr = bytearray("\x00" * self.size - (3 * self.addr_size))
-
-        try:
-            self.pio.__enter__()
-        except Exception as e:
-            raise e
         
         try:
-            # write prev, mode, content, and next
+            # pack prev, mode, content, and next
+
+            raw = bytearray("\x00" * self.size)
+            raw[:self.addr_size] = longs.ltopa(self.prev_index, self.addr_size)
+            raw[self.addr_size:2 * self.addr_size] = longs.ltopa(self.mode, self.addr_size)
+            raw[2 * self.addr_size:-self.addr_size] = arr
+            raw[-self.addr_size:] = longs.ltopa(self.next_index, self.addr_size)
+
+            # encipher
+
+            raw = self.cipher.encipher(raw)
             
-            self.pio._raw_func(file.write, longs.ltopa(self.prev_index, self.addr_size))
-            self.pio._raw_func(file.write, longs.ltopa(self.mode, self.addr_size))
-            self.pio._raw_func(file.write, arr)
-            self.pio._raw_func(file.write, longs.ltopa(self.next_index, self.addr_size))
-            self.pio.__exit__()
+            # write
+
+            self.pio.func(file.write, raw)
+
+            # clean
+
+            memshred.memshred(raw)
+
+            del raw
+            
         except Exception as e:
-            try:
-                self.pio.__exit__()
-            except Exception as ee:
-                raise ee
             raise e

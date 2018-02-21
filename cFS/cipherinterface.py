@@ -1,10 +1,11 @@
 """
 cFS cipher interface:
-all ciphers cFS uses should implement this"""
+all ciphers cFS uses should implement this
+"""
 
 __package__ = "cfs"
 
-class cFSCipherInterface:
+class CipherInterface:
   def __init__(self, key):
     raise NotImplementedError()
   

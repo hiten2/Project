@@ -5,10 +5,14 @@ __package__ = "cfs"
 import inode
 
 class InodeChain:
-    """parsing and I/O for an inode chain"""
-    def __init__(self, *args, **kwargs):
+    """
+    parsing and I/O for an inode chain
+    where get_vacant_inode_index must be a function
+    """
+    def __init__(self, get_vacant_inode_index, *args, **kwargs):
         self.entry = inode.Inode(*args, **kwargs)
         self._cur = self.entry
+        self.get_vacant_inode_index = get_vacant_inode_index
 
     def next(self):
         """return the next inode"""
