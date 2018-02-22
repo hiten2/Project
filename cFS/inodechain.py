@@ -10,6 +10,7 @@ class InodeChain:
     where get_vacant_inode_index must be a function
     """
     """should be a way to determine size"""
+    """needs a seek method"""
     def __init__(self, get_vacant_inode_index, *args, **kwargs):
         self.entry = inode.Inode(*args, **kwargs)
         self._cur = self.entry
@@ -19,10 +20,10 @@ class InodeChain:
         """return the next inode"""
         if not self._cur.next_index == UNKNOWN:
             self._cur = inode.Inode(
-                self._cur.pio.node,
+                self.entry.pio.node,
                 self._cur.next_index,
-                self._cur.addr_size,
-                self._cur.inode_size
+                self.entry.addr_size,
+                self.entry.inode_size
                 )
             return self._cur
         return None
@@ -31,10 +32,10 @@ class InodeChain:
         """return the previous inode"""
         if not self._cur.prev_index == UNKNOWN:
             self._cur = inode.Inode(
-                self._cur.pio.node,
+                self.entry.pio.node,
                 self._cur.prev_index,
-                self._cur.addr_size,
-                self._cur.inode_size
+                self.entry.addr_size,
+                self.entry.inode_size
                 )
             return self._cur
         return None

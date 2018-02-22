@@ -32,7 +32,7 @@ if __name__ == "__main__":
     print "q contents:", q.__list__(), "(in-memory) &", [node.read()], "(on-disk)"
 
     for i in range(10):
-        print "%sth q.dequeue():" % str(i), q.dequeue(), "size:", q.size
+        print "q.dequeue() + #%s:" % str(i), q.dequeue(), "size:", q.size
     print "q.dequeue() when empty:", str(q.dequeue())
     node.close()
     print
