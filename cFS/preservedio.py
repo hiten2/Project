@@ -7,7 +7,7 @@ import os
 class PreservedIO:
     def __init__(self, f, pos):
         assert isinstance(f, file) and not f.closed, "f must be an open \'file\'"
-        assert type(pos) in (int, long) and pos > 0, "pos must be a positive integer"
+        assert type(pos) in (int, long) and pos >= 0, "pos must be a non-negative integer"
         self.f = f
         self.pos = pos
         self._start = self.f.tell()
@@ -19,12 +19,12 @@ class PreservedIO:
 
     def __exit__(self):
         """reseek"""
-        self.f.seek(self.start, os.SEEK_SET)
+        self.f.seek(self._start, os.SEEK_SET)
     
-    def func(func, *args, **kwargs):
+    def func(self, func, *args, **kwargs):
         """execute a function at the position and reseek"""
         self.__enter__()
-        v = self._raw_func(func. *args, **kwargs)
+        v = self._raw_func(func, *args, **kwargs)
         self.__exit__()
         return v
 

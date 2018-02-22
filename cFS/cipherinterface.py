@@ -7,7 +7,7 @@ __package__ = "cfs"
 
 class CipherInterface:
   def __init__(self, key):
-    raise NotImplementedError()
+    self.key = key
   
   def decipher(self, s):
     raise NotImplementedError()

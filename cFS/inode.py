@@ -9,6 +9,9 @@ import memshred
 import preservedio
 import os
 
+global INODE_SIZE
+INODE_SIZE = 512
+
 global UNKNOWN
 UNKNOWN = 0 # unknown address or mode
 

@@ -6,7 +6,7 @@ import cipherinterface
 
 class DummyCipher(cipherinterface.CipherInterface):
     def __init__(self, *args, **kwargs):
-        cipherinterface.CipherInterface.__init__(self)
+        cipherinterface.CipherInterface.__init__(self, "")
 
     def decipher(self, s, *args, **kwargs):
         return s
