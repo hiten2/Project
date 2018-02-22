@@ -1,10 +1,18 @@
 # cFS (a basic encrypted filesystem)
 ## development plan
-1. ~~solidify `diskutil.py` to be able to perform disk-related operations and atol/ltoa conversions~~
-2. ~~fix bugs in `longs.py` (so that tests in `../cfstest.py` are successful)~~
-3. finish `diskcdll.py`, and make sure that it is able to store an encrypted doubly linked list on disk
-4. determine a logical structure for a cFS object and its encryption standard, then optimize it for efficiency
-5. compile using Cython into a shared object library
+1. parsers
+  - ~~`cipherinterface.py`~~
+  - ~~`dummycipher.py`~~
+  - `inode.py`
+  - `inodechain.py`
+  - (soon to be `inodetree.py`)
+  - ~~`longs.py`~~
+  - ~~`memshred.py`~~
+  - ~~`preservedio.py`~~
+  - `vacantinodequeue.py`
+2. cFS class
+3. convert to Cython
+4. rewrite in C
 
 **note that security can be compromised by the cipher implementation**
 
@@ -16,7 +24,7 @@
 # structure
 
 ## a cFS instance is inode-based:
-- there is a header containing cryptographic information & size constraints
+- there is a header containing cryptographic information, inode vacancy queue & size constraints
 - there's an entry inode (first inode of the root directory)
 - within the entry inode (and subsequent directory inodes) are SHA-256/inode number (logical order) pairs (these represent containment and links)
 - the inode is prefixed and suffixed by previous and next signed inode numbers
@@ -24,7 +32,7 @@
 - each inode is separately encrypted (this makes cryptanalysis more difficult and reduces block/stream-based corruption in inode chains)
 
 ## to summarize:
-header: *key & sizes*
+header: *key verification data, inode vacancy queue (for occasional wear leveling) & sizes*
 
 inodes: *signed previous inode, mode, content, signed next inode*; **inodes are individually encrypted**
 

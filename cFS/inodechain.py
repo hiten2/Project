@@ -9,6 +9,7 @@ class InodeChain:
     parsing and I/O for an inode chain
     where get_vacant_inode_index must be a function
     """
+    """should be a way to determine size"""
     def __init__(self, get_vacant_inode_index, *args, **kwargs):
         self.entry = inode.Inode(*args, **kwargs)
         self._cur = self.entry
@@ -29,3 +30,4 @@ class InodeChain:
         """unfinished"""
         if arr == None:
             pass
+        return arr
