@@ -3,7 +3,7 @@
 1. parsers
   - ~~`cipherinterface.py`~~
   - ~~`dummycipher.py`~~
-  - `inode.py`
+  - ~~`inode.py`~~
   - `inodechain.py`
   - (soon to be `inodetree.py`)
   - ~~`longs.py`~~

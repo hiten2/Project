@@ -17,14 +17,14 @@ if __name__ == "__main__":
     print
     print "cfs.vacantinodequeue"
     print
-    node = open("dummynode.txt", "r+")
+    node = open("dummyvacantinodequeue.txt", "r+")
     q = cfs.vacantinodequeue.VacantInodeQueue(node, 0)
     print "q = cfs.vacantinodequeue.VacantInodeQueue(%s, 0)" % str(node)
     q.load()
     print "q.load()"
     node.seek(0, os.SEEK_SET)
     print "q contents:", q.__list__(), "(in-memory) &", [node.read()], "(on-disk)"
-
+    
     for i in range(10):
         print "q.enqueue(%s)" % str(i), "size:", q.size
         q.enqueue(i)
@@ -35,3 +35,18 @@ if __name__ == "__main__":
         print "%sth q.dequeue():" % str(i), q.dequeue(), "size:", q.size
     print "q.dequeue() when empty:", str(q.dequeue())
     node.close()
+    print
+    print "cfs.inode"
+    print
+    node = open("dummyinode.txt", "r+")
+    i = cfs.inode.Inode(node, 0)
+    print "i = cfs.inode.Inode(%s, 0)" % str(node)
+    i.format()
+    print "i.format()"
+    data = "abcdefg"
+    i.write(data)
+    print "i.write(\"%s\")" % data
+    node.seek(0, os.SEEK_SET)
+    print "i contents:"
+    print [i.read()], "(from API)"
+    print [node.read()], "(on-disk)"

@@ -17,13 +17,27 @@ class InodeChain:
 
     def next(self):
         """return the next inode"""
-        self._cur = self._cur.next()
-        return self._cur
+        if not self._cur.next_index == UNKNOWN:
+            self._cur = inode.Inode(
+                self._cur.pio.node,
+                self._cur.next_index,
+                self._cur.addr_size,
+                self._cur.inode_size
+                )
+            return self._cur
+        return None
 
     def prev(self):
         """return the previous inode"""
-        self._cur = self._cur.prev()
-        return self._cur
+        if not self._cur.prev_index == UNKNOWN:
+            self._cur = inode.Inode(
+                self._cur.pio.node,
+                self._cur.prev_index,
+                self._cur.addr_size,
+                self._cur.inode_size
+                )
+            return self._cur
+        return None
 
     def read(self, arr = None, b = -1, offset = 0):
         """read b bytes into the bytearray starting from the offset in the current inode"""

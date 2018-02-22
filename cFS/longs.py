@@ -8,7 +8,7 @@ global LONG_SIZE # Python longs have infinite precision, so this is a generaliza
 
 def atol(a):
     """return a long long representation for a string"""
-    a = [ord(c) for c in a]
+    a = [ord(c) for c in str(a)]
     a.reverse()
     l = 0L
 

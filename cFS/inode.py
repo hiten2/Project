@@ -35,7 +35,7 @@ class Inode:
         self.addr_size = addr_size
         self.cipher = cipher
         self.index = index
-        self.pio = preservedio.PreservedIO(node, self.position * inode_size) # wrapper for node
+        self.pio = preservedio.PreservedIO(node, self.index * inode_size) # wrapper for node
         self.inode_size = inode_size
 
         self.mode = UNKNOWN
@@ -51,25 +51,15 @@ class Inode:
         self.prev_index = UNKNOWN
 
         self.write()
-
-    def next(self):
-        """return the next inode or None"""
-        if not self.next_index == UNKNOWN:
-            return Inode(self.pio.node, self.next_index, self.addr_size, self.inode_size)
-        return None
-
-    def prev(self):
-        """return the previous inode or None"""
-        if not self.prev_index == UNKNOWN:
-            return Inode(self.pio.node, self.prev_index, self.addr_size, self.inode_size)
-        return None
     
     def read(self):
         """read the inode contents"""
+        arr = bytearray()
+        
         try:
             # decipher
 
-            raw = self.cipher.decipher(self.pio.func(file.read, self.inode_size))
+            raw = self.cipher.decipher(bytearray(self.pio.func(file.read, self.inode_size)))
             
             # unpack prev, mode, content, and next
             
@@ -91,7 +81,7 @@ class Inode:
     def write(self, arr = None):
         """write a bytearray into the inode"""
         if not arr:
-            arr = bytearray("\x00" * self.inode_size - (3 * self.addr_size))
+            arr = bytearray("\x00" * (self.inode_size - (3 * self.addr_size)))
         
         try:
             # pack prev, mode, content, and next
@@ -99,7 +89,7 @@ class Inode:
             raw = bytearray("\x00" * self.inode_size)
             raw[:self.addr_size] = longs.ltopa(self.prev_index, self.addr_size)
             raw[self.addr_size:2 * self.addr_size] = longs.ltopa(self.mode, self.addr_size)
-            raw[2 * self.addr_size:-self.addr_size] = arr
+            raw[2 * self.addr_size:len(arr)] = arr
             raw[-self.addr_size:] = longs.ltopa(self.next_index, self.addr_size)
 
             # encipher
