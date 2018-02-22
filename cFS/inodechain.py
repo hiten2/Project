@@ -11,6 +11,7 @@ class InodeChain:
     """
     """should be a way to determine size"""
     """needs a seek method"""
+    """needs to handle random extraction"""
     def __init__(self, get_vacant_inode_index, *args, **kwargs):
         self.entry = inode.Inode(*args, **kwargs)
         self._cur = self.entry

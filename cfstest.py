@@ -43,9 +43,11 @@ if __name__ == "__main__":
     print "i = cfs.inode.Inode(%s, 0)" % str(node)
     i.format()
     print "i.format()"
+    print "i.size:", i.size
     data = "abcdefg"
     i.write(data)
-    print "i.write(\"%s\")" % data
+    print "i.write(\"%s\") (%s bytes)" % (data, str(len(data)))
+    print "i.size:", i.size
     node.seek(0, os.SEEK_SET)
     print "i contents:"
     print [i.read()], "(from API)"

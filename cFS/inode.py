@@ -37,10 +37,12 @@ class Inode:
         self.index = index
         self.pio = preservedio.PreservedIO(node, self.index * inode_size) # wrapper for node
         self.inode_size = inode_size
+        self.size_size = len(longs.ltoa(self.inode_size)) # keep this concise
 
         self.mode = UNKNOWN
         self.next_index = UNKNOWN
         self.prev_index = UNKNOWN
+        self.size = 0 # bytes currently in-use
         
         self.read() # initializes node from disk
 
@@ -49,6 +51,7 @@ class Inode:
         self.mode = UNKNOWN
         self.next_index = UNKNOWN
         self.prev_index = UNKNOWN
+        self.size = 0
 
         self.write()
     
@@ -65,7 +68,15 @@ class Inode:
             
             self.prev_index = longs.atol(raw[:self.addr_size])
             self.mode = longs.atol(raw[self.addr_size:2 * self.addr_size])
-            arr = bytearray(raw[2 * self.addr_size:-self.addr_size])
+            self.size = longs.atol(raw[2 * self.addr_size:(2 * self.addr_size) + self.size_size])
+            arr = bytearray(raw[(2 * self.addr_size) + self.size_size:-self.addr_size])
+
+            if len(arr) > self.size:
+                temp = arr
+                arr = arr[:self.size]
+
+                del temp
+            
             self.next_index = longs.atol(raw[-self.addr_size:])
 
             # clean
@@ -81,7 +92,10 @@ class Inode:
     def write(self, arr = None):
         """write a bytearray into the inode"""
         if not arr:
-            arr = bytearray("\x00" * (self.inode_size - (3 * self.addr_size)))
+            arr = bytearray("\x00" * (self.inode_size - ((3 * self.addr_size) + self.size_size)))
+        else:
+            assert len(arr) <= self.inode_size - ((3 * self.addr_size) + self.size_size), "arr is too big"
+            self.size = len(arr)
         
         try:
             # pack prev, mode, content, and next
@@ -89,7 +103,8 @@ class Inode:
             raw = bytearray("\x00" * self.inode_size)
             raw[:self.addr_size] = longs.ltopa(self.prev_index, self.addr_size)
             raw[self.addr_size:2 * self.addr_size] = longs.ltopa(self.mode, self.addr_size)
-            raw[2 * self.addr_size:len(arr)] = arr
+            raw[2 * self.addr_size:(2 * self.addr_size) + self.size_size] = longs.ltopa(self.size, self.size_size)
+            raw[(2 * self.addr_size) + self.size_size:(2 * self.addr_size) + self.size_size + len(arr)] = arr
             raw[-self.addr_size:] = longs.ltopa(self.next_index, self.addr_size)
 
             # encipher
