@@ -17,9 +17,11 @@ if __name__ == "__main__":
     print
     print "cfs.vacantinodequeue"
     print
-    node = open("dummynode.txt", "w+")
+    node = open("dummynode.txt", "r+")
     q = cfs.vacantinodequeue.VacantInodeQueue(node, 0)
     print "q = cfs.vacantinodequeue.VacantInodeQueue(%s, 0)" % str(node)
+    q.load()
+    print "q.load()"
     node.seek(0, os.SEEK_SET)
     print "q contents:", q.__list__(), "(in-memory) &", [node.read()], "(on-disk)"
 

@@ -9,7 +9,7 @@
   - ~~`longs.py`~~
   - ~~`memshred.py`~~
   - ~~`preservedio.py`~~
-  - `vacantinodequeue.py`
+  - ~~`vacantinodequeue.py`~~
 2. cFS class
 3. convert to Cython
 4. rewrite in C

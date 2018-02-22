@@ -28,15 +28,15 @@ class Inode:
     dull interface for inode I/O and chain traversal
     an inode can't be linked to the zeroth inode as it is reserved
     """
-    def __init__(self, node, index, addr_size = longs.LONG_SIZE, size = INODE_SIZE,
+    def __init__(self, node, index, addr_size = longs.LONG_SIZE, inode_size = INODE_SIZE,
             cipher = dummycipher.DummyCipher()):
-        assert type(size) in (int, long) and addr_size > 0 and size > 3 * addr_size, "*size must be a positive integer > 3 * addr_size"
+        assert type(inode_size) in (int, long) and addr_size > 0 and inode_size > 3 * addr_size, "*size must be a positive integer > 3 * addr_size"
         assert isinstance(cipher, cipherinterface.CipherInterface), "cipher must be a cipherinterface.CipherInterface instance"
         self.addr_size = addr_size
         self.cipher = cipher
         self.index = index
-        self.pio = preservedio.PreservedIO(node, self.position * self.size) # wrapper for node
-        self.size = size
+        self.pio = preservedio.PreservedIO(node, self.position * inode_size) # wrapper for node
+        self.inode_size = inode_size
 
         self.mode = UNKNOWN
         self.next_index = UNKNOWN
@@ -55,13 +55,13 @@ class Inode:
     def next(self):
         """return the next inode or None"""
         if not self.next_index == UNKNOWN:
-            return Inode(self.pio.node, self.next_index, self.addr_size, self.size)
+            return Inode(self.pio.node, self.next_index, self.addr_size, self.inode_size)
         return None
 
     def prev(self):
         """return the previous inode or None"""
         if not self.prev_index == UNKNOWN:
-            return Inode(self.pio.node, self.prev_index, self.addr_size, self.size)
+            return Inode(self.pio.node, self.prev_index, self.addr_size, self.inode_size)
         return None
     
     def read(self):
@@ -69,7 +69,7 @@ class Inode:
         try:
             # decipher
 
-            raw = self.cipher.decipher(self.pio.func(file.read, self.size))
+            raw = self.cipher.decipher(self.pio.func(file.read, self.inode_size))
             
             # unpack prev, mode, content, and next
             
@@ -91,12 +91,12 @@ class Inode:
     def write(self, arr = None):
         """write a bytearray into the inode"""
         if not arr:
-            arr = bytearray("\x00" * self.size - (3 * self.addr_size))
+            arr = bytearray("\x00" * self.inode_size - (3 * self.addr_size))
         
         try:
             # pack prev, mode, content, and next
 
-            raw = bytearray("\x00" * self.size)
+            raw = bytearray("\x00" * self.inode_size)
             raw[:self.addr_size] = longs.ltopa(self.prev_index, self.addr_size)
             raw[self.addr_size:2 * self.addr_size] = longs.ltopa(self.mode, self.addr_size)
             raw[2 * self.addr_size:-self.addr_size] = arr
