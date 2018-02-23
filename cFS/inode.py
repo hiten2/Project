@@ -26,7 +26,7 @@ FILE = 1
 class Inode:
     """
     dull interface for inode I/O and chain traversal
-    an inode can't be linked to the zeroth inode as it is reserved
+    the inode index 0 is reserved
     """
     def __init__(self, node, index, addr_size = longs.LONG_SIZE, inode_size = INODE_SIZE,
             cipher = dummycipher.DummyCipher()):
@@ -37,7 +37,7 @@ class Inode:
         self.index = index
         self.pio = preservedio.PreservedIO(node, self.index * inode_size) # wrapper for node
         self.inode_size = inode_size
-        self.size_size = len(longs.ltoa(self.inode_size)) # keep this concise
+        self.size_size = len(longs.ltoa(self.inode_size)) # keep this compact
 
         self.mode = UNKNOWN
         self.next_index = UNKNOWN
@@ -56,7 +56,7 @@ class Inode:
         self.write()
     
     def read(self):
-        """read the inode contents"""
+        """load the inode and return the content"""
         arr = bytearray()
         
         try:

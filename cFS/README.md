@@ -1,6 +1,6 @@
 # cFS (a basic encrypted filesystem)
 ## development plan
-1. parsers
+1. utilities
   - ~~`cipherinterface.py`~~
   - ~~`dummycipher.py`~~
   - ~~`inode.py`~~
@@ -10,7 +10,7 @@
   - ~~`memshred.py`~~
   - ~~`preservedio.py`~~
   - ~~`vacantinodequeue.py`~~
-2. cFS class
+2. `cfs.py`
 3. convert to Cython
 4. rewrite in C
 
@@ -18,7 +18,7 @@
 
 **we should add a format operation--maybe rethink structure?**
 
-*General layout follows inode structure (see below), although nodes are actually doubly-linked lists.*
+*General layout follows inode structure (see below), although the inode tree is a tree w/ nodes that are doubly-linked lists.*
 ![](tmp.png?raw=true)
 
 # structure
