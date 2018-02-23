@@ -17,6 +17,10 @@ if __name__ == "__main__":
     print
     print "cfs.vacantinodequeue"
     print
+
+    if not os.path.exists("dummyvacantinodequeue.txt"):
+        with open("dummyvacantinodequeue.txt", "w") as f:
+            f.write("")
     node = open("dummyvacantinodequeue.txt", "r+")
     q = cfs.vacantinodequeue.VacantInodeQueue(node, 0)
     print "q = cfs.vacantinodequeue.VacantInodeQueue(%s, 0)" % str(node)
@@ -38,6 +42,10 @@ if __name__ == "__main__":
     print
     print "cfs.inode"
     print
+    
+    if not os.path.exists("dummyinode.txt"):
+        with open("dummyinode.txt", "w") as f:
+            f.write("")
     node = open("dummyinode.txt", "r+")
     i = cfs.inode.Inode(node, 0)
     print "i = cfs.inode.Inode(%s, 0)" % str(node)
