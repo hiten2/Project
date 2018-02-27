@@ -10,9 +10,10 @@
   - ~~`memshred.py`~~
   - ~~`preservedio.py`~~
   - ~~`vacantinodequeue.py`~~
-2. `cfs.py`
-3. convert to Cython
-4. rewrite in C
+2. finalize encryption scheme
+3. `cfs.py`
+4. convert to Cython
+5. rewrite in C
 
 **note that security can be compromised by the cipher implementation**
 

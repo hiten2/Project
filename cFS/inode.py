@@ -28,6 +28,7 @@ class Inode:
     dull interface for inode I/O and chain traversal
     the inode index 0 is reserved
     """
+    ####encryption is temporarily deactivated until we find a better solution
     def __init__(self, node, index, addr_size = longs.LONG_SIZE, inode_size = INODE_SIZE,
             cipher = dummycipher.DummyCipher()):
         assert type(inode_size) in (int, long) and addr_size > 0 and inode_size > 3 * addr_size, "*size must be a positive integer > 3 * addr_size"
@@ -60,9 +61,11 @@ class Inode:
         arr = bytearray()
         
         try:
+            raw = bytearray(self.pio.func(file.read, self.inode_size))
+            
             # decipher
 
-            raw = self.cipher.decipher(bytearray(self.pio.func(file.read, self.inode_size)))
+            #raw = self.cipher.decipher(raw)
             
             # unpack prev, mode, content, and next
             
@@ -109,7 +112,7 @@ class Inode:
 
             # encipher
 
-            raw = self.cipher.encipher(raw)
+            #raw = self.cipher.encipher(raw)
             
             # write
 
