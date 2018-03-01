@@ -100,6 +100,7 @@ if __name__ == "__main__":
         del i
 
         i = c.next()
+    c.iterator(i)
     print "[reading backwards]"
 
     while i:
@@ -108,6 +109,7 @@ if __name__ == "__main__":
         del i
 
         i = c.prev()
+    
     del c
     
     node.close()
