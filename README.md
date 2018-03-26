@@ -1,2 +1,1 @@
-# Project
-*generic outline for a collection of projects*
+# migrated to  https://github.com/hiten2/cFS
