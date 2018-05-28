@@ -1,1 +1,7 @@
-# migrated to  https://github.com/hiten2/cFS
+# skills checklist
+- `git`
+- `*nix`
+- `Python`
+  - I/O
+  - parsing
+  - sockets
