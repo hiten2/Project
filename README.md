@@ -1,4 +1,4 @@
-# skills checklist
+# oishish skills checklist
 - `git`
 - `*nix`
   - everything is a file
