@@ -9,3 +9,6 @@ import tr4ckdb
 
 def print_callback(*args, **kwargs):
     print args, kwargs
+
+if __name__ == "__main__":
+    scapy.all.sniff(prn = print_callback) # testing scapy.all.sniff(....)
