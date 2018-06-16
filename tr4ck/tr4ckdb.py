@@ -18,8 +18,8 @@ class Tr4ckDB(db.DB):
 
     def _generate_id(self, packet):
         """return the described ID for a packet"""
-        return str(packet)
+        return "->".join((packet.src, packet.dst))
     
     def store(self, packet, mode = "wb"):
         """store the packet based on it addresses"""
-        db.DB.store(self, packet, self._generate_id(packet), mode = mode)
+        db.DB.store(self, str(packet), self._generate_id(packet), mode = mode)
