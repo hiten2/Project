@@ -9,8 +9,7 @@ class Tr4ckDB(db.DB):
     """
     database for the tr4ck tool
     
-    packets are stored in the following format:
-    "source MAC->destination MAC"
+    uses the _generate_id function to categorize a packet
     """
     
     def __init__(self, *args, **kwargs):
@@ -26,7 +25,12 @@ class Tr4ckDB(db.DB):
             mode = mode)
 
 class PacketDB(Tr4ckDB):
-    """packet database"""
+    """
+    packet database
+    
+    packets are stored in the following format:
+    "source MAC->destination MAC"
+    """
 
     def __init__(self, *args, **kwargs):
         Tr4ckDB.__init__(self, *args, **kwargs)
