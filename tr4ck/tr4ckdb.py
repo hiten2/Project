@@ -7,7 +7,7 @@ import db
 
 class Tr4ckDB(db.DB):
     """
-    database for the tr4ck tool
+    database base class for tracking
     
     uses the _generate_id function to categorize a packet
     """
@@ -24,9 +24,9 @@ class Tr4ckDB(db.DB):
         return db.DB.store(self, str(packet), self._generate_id(packet),
             mode = mode)
 
-class PacketDB(Tr4ckDB):
+class MACDB(Tr4ckDB):
     """
-    packet database
+    MAC-based database
     
     packets are stored in the following format:
     "source MAC->destination MAC"

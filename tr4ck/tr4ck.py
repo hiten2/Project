@@ -7,7 +7,7 @@ sys.path.append(os.path.realpath(__file__))
 
 import tr4ckdb
 
-class PacketTracker(tr4ckdb.PacketDB):
+class PacketTracker(tr4ckdb.MACDB):
     """
     base class for tracking packets
 
@@ -16,7 +16,7 @@ class PacketTracker(tr4ckdb.PacketDB):
 
     def __init__(self, directory = os.getcwd(), db_mode = "ab",
             concurrent = True, filter = lambda p: True):
-        tr4ckdb.PacketDB.__init__(self, directory, db_mode, concurrent)
+        tr4ckdb.MACDB.__init__(self, directory, db_mode, concurrent)
 
         self._filter = filter
     
