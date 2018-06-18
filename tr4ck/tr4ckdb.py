@@ -5,6 +5,13 @@ sys.path.append(os.path.realpath(__file__))
 
 import db
 
+def dummy(_class, *args, **kwargs):
+    """create a dummy database"""
+    if len(args) == 4:
+        args = args[:3]
+    kwargs["store"] = False
+    return _class(*args, **kwargs)
+
 class Tr4ckDB(db.DB):
     """
     database base class for tracking, with optional dummy functionality

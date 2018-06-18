@@ -13,4 +13,9 @@ from traffic analysis to host triangulation
 """
 
 if __name__ == "__main__":
-    traffic.PacketTracker(tr4ckdb.MACDB("test", store = False)).track()
+    # create a dummy database
+    # and try collecting some packets into it
+
+    # this will print source->destination MAC addresses
+    db = tr4ckdb.dummy(tr4ckdb.MACDB)
+    traffic.PacketTracker(db).track()
