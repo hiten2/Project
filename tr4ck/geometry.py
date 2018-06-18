@@ -20,9 +20,16 @@ class Circle:
     def __contains__(self, point):
         return self.center.euclidean_distance(point) <= self.radius
 
-    def intersect(self, other):
+    def intersect(self, other):#########not done
         """determine the points of intersection with another circle"""
-        pass
+        euclidean_distance = self.center.euclidean_distance(other.center)
+        radii_sum = self.radius + other.radius
+        
+        if euclidean_distance > radii_sum:
+            return []
+        elif euclidean_distance == radii_sum:
+            pass########1 point
+        pass#############2 points
 
 class Point:
     """basic representation for a point"""
@@ -36,13 +43,41 @@ class Point:
             for i in range(len(self.magnitudes))]
         return math.sqrt(sum((d ** 2 for d in diffs)))
 
-class Polygon:
-    """representation for a polygon"""
+    def __str__(self):
+        return str(self.magnitudes)
 
-    def __init__(self, vertices = None):
+class Polygon:
+    """representation for a 2D polygon"""
+
+    def __init__(self, *vertices):
         if not vertices:
-            vertices = []
+            vertices = ()
         self.vertices = vertices
 
     def __contains__(self, point):
         pass
+
+    def normalize(self):
+        """
+        remove overlapping line segments by rearranging order
+        of vertices
+
+        the resulting polygon may not be congruent to the original
+        """
+        high = []
+        low = []
+        n_vertices = len(self.vertices)
+        mean_y = sum((v.magnitudes[1] for v in self.vertices))
+        mean_y /= float(n_vertices)
+        
+        for v in self.vertices:
+            if v.magnitudes[1] > mean_y:
+                high.append(v)
+            else:
+                low.append(v)
+        high = sorted(high, key = lambda v: v.magnitudes[0])
+        low = sorted(low, key = lambda v: v.magnitudes[0], reverse = True)
+        self.vertices = high + low
+
+    def __str__(self):
+        return str(tuple(v for v in self.vertices))

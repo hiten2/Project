@@ -44,7 +44,7 @@ def help():
           "\t--tcpconnect\trun a TCP connect scan (default)\n" \
           "\t--tcpresponse\trun a TCP response scan\n" \
           "\t--udpresponse\trun a UDP response scan\n" \
-          "\t-y, --yesonly\tonly print successful entries\t" \
+          "\t-y, --yesonly\tonly print successful entries\n" \
           "ADDRESSES\n" \
           "\ta space-separated list of IP addresses, subdomains,\n" \
           "\tand/or hostnames\n" \

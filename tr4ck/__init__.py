@@ -10,6 +10,3 @@ __doc__ = """
 various tracking/analysis tools
 from traffic analysis to host triangulation
 """
-
-if __name__ == "__main__":
-    traffic.PacketTracker("test", store = False).track()
