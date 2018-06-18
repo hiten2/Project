@@ -38,7 +38,7 @@
 #   however, modification of this code and/or license,
 #   does NOT void this original license.
 
-"""basic web database management"""
+__doc__ = """basic web database management"""
 
 import csv
 import fcntl
@@ -73,9 +73,11 @@ class DB:
     database file and its existence on-disk
     """#######################ensure parallel safety
     ##############fix encoding issues
+    ###########clean
+    ##############command-line options
 
     def __init__(self, directory = os.getcwd(), db_mode = "ab",
-            concurrent = True):
+            concurrent = True, enter = True):
         self.concurrent = concurrent
         self._db_csv = os.path.join(directory, "db.csv")
         self._db_csv_fp = None
@@ -85,8 +87,31 @@ class DB:
         self.directory = directory
         self._encodeid = lambda i: str(i).encode("unicode-escape")
         
-        self.__enter__()
+        if enter:
+            self.__enter__()
 
+    def clean(self):
+        """
+        clean and reload "db.csv"
+
+        remove repeats and non-existent entries
+        """
+        _db_csv_fp = open(self._db_csv, "rb")
+        rows = set() # prevent repeats
+        
+        fcntl.flock(self._db_csv_fp.fileno(), fcntl.LOCK_EX)
+
+        for entry, hash in csv.reader(_db_csv_fp):
+            if row and self.exists(hash): # exists
+                rows.add(tuple(row))
+        _db_csv_fp.close()
+        self._db_csv_fp.seek(0, os.SEEK_SET)
+
+        for row in rows: # rewrite rows
+            self._db_csv_writer.writerow(row)
+        os.fdatasync(self._db_csv_fp.fileno())
+        fcntl.flock(self._db_csv_fp.fileno(), fcntl.LOCK_UN)
+    
     def __del__(self):
         self.__exit__()
     
