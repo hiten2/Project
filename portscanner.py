@@ -51,6 +51,138 @@ def help():
           "\tif omitted, attempt to scan all addresses in the access\n" \
           "\tpoint's subdomain"
 
+def main():
+    """run the main program from sys.argv, without catching SIGINT"""
+    i = 1
+    ips = []
+    names = ("connect", "tcp")
+    ports = []
+    scankwargs = {}
+    sort = False
+    timeout = None
+    yes_only = False
+
+    while i < len(sys.argv): # parse arguments
+        arg = sys.argv[i]
+
+        if arg.startswith("--"):
+            arg = arg[2:]
+
+            if arg == "help":
+                help()
+                sys.exit()
+            elif arg.startswith("nbytes="):
+                try:
+                    scankwargs["nbytes"] = int(arg.split('=', 1)[1])
+                except ValueError:
+                    pass
+            elif arg.startswith("ports="):
+                ports += _split_port_csv(arg.split('=', 1)[1])
+            elif arg.startswith("prompt="):
+                scankwargs["prompt"] = arg.split('=', 1)[1]
+            elif arg == "sort":
+                sort = True
+            elif arg.startswith("timeout="):
+                try:
+                    timeout = float(arg.split('=', 1)[1])
+                except ValueError:
+                    pass
+            elif arg == "tcpconnect":
+                names = ("connect", "tcp")
+            elif arg == "tcpresponse":
+                names = ("response", "tcp")
+            elif arg == "udpresponse":
+                names = ("response", "udp")
+            elif arg == "yesonly":
+                yes_only = True
+            else:
+                print "Invalid argument."
+                help()
+                sys.exit()
+        elif arg.startswith('-'):
+            arg = arg[1:]
+
+            for c in arg:
+                if c == 'h':
+                    help()
+                    sys.exit()
+                elif c == 'n':
+                    if i == len(sys.argv) - 1:
+                        print "Argument required."
+                        help()
+                        sys.exit()
+
+                    try:
+                        scankwargs["nbytes"] = int(sys.argv[i + 1])
+                    except ValueError:
+                        pass
+                    i += 1
+                elif c == 'p':
+                    if i == len(sys.argv) - 1:
+                        print "Argument required."
+                        help()
+                        sys.exit()
+                    ports += _split_port_csv(sys.argv[i + 1])
+                    i += 1
+                elif c == 's':
+                    sort = True
+                elif c == 't':
+                    if i == len(sys.argv) - 1:
+                        print "Argument required."
+                        help()
+                        sys.exit()
+
+                    try:
+                        timeout = float(sys.argv[i + 1])
+                    except ValueError:
+                        pass
+                    i += 1
+                elif c == 'y':
+                    yes_only = True
+                else:
+                    print "Invalid flag."
+                    help()
+                    sys.exit()
+        elif arg:
+            ips.append(arg)
+        i += 1
+    
+    if not ips: # no addresses, so scan the router prefix subdomain
+        ips = _get_router_prefix()
+        ips = ips[:ips.rfind('.')] # strip final number
+
+    if not ports:
+        ports = [21, 22, 25, 80, 8080]
+    scanner = SubdomainScanner(_scanclassbynames(names), ips, ports, timeout,
+        **scankwargs)
+    output = scanner.scan() # is a generator by default
+
+    if sort: # make the list pretty
+        try:
+            output = sorted(list(output), key = lambda t: t[0])
+        except KeyboardInterrupt:
+            sys.exit()
+    header = "Success\tAddress" # print a header
+    
+    if "response" in names:
+        header += "\tResponse"
+    print header
+    
+    for address, success, data in output:
+        if not data:
+            data = ''
+        data = data.encode("unicode-escape")
+        
+        if "response" in names:
+            if success:
+                print "Yes\t%s:%u\t%s" % (address[0], address[1], data)
+            elif not yes_only:
+                print "no\t%s:%u\t%s" % (address[0], address[1], data)
+        elif success:
+            print "Yes\t%s:%u" % address
+        elif not yes_only:
+            print "no\t%s:%u" % address
+
 def _scanclassbynames(names):
     """
     return a scan class by a list/tuple of its names
@@ -236,7 +368,7 @@ class Scanner:
                 self.ports[port] = {}
         self._scanargs = scanargs
         self._scankwargs = scankwargs
-        assert scanclass, "scanclass cannot be None"
+        assert scanclass, "empty scanclass"
         self._scanclass = scanclass
     
     def scan(self):
@@ -343,135 +475,8 @@ class SubdomainScanner(ThreadedScanner):
                     pass
 
 if __name__ == "__main__":
-    i = 1
-    ips = []
-    names = ("connect", "tcp")
-    ports = []
-    scankwargs = {}
-    sort = False
-    timeout = None
-    yes_only = False
-
-    while i < len(sys.argv): # parse arguments
-        arg = sys.argv[i]
-
-        if arg.startswith("--"):
-            arg = arg[2:]
-
-            if arg == "help":
-                help()
-                sys.exit()
-            elif arg.startswith("nbytes="):
-                try:
-                    scankwargs["nbytes"] = int(arg.split('=', 1)[1])
-                except ValueError:
-                    pass
-            elif arg.startswith("ports="):
-                ports += _split_port_csv(arg.split('=', 1)[1])
-            elif arg.startswith("prompt="):
-                scankwargs["prompt"] = arg.split('=', 1)[1]
-            elif arg == "sort":
-                sort = True
-            elif arg.startswith("timeout="):
-                try:
-                    timeout = float(arg.split('=', 1)[1])
-                except ValueError:
-                    pass
-            elif arg == "tcpconnect":
-                names = ("connect", "tcp")
-            elif arg == "tcpresponse":
-                names = ("response", "tcp")
-            elif arg == "udpresponse":
-                names = ("response", "udp")
-            elif arg == "yesonly":
-                yes_only = True
-            else:
-                print "Invalid argument."
-                help()
-                sys.exit()
-        elif arg.startswith('-'):
-            arg = arg[1:]
-
-            for c in arg:
-                if c == 'h':
-                    help()
-                    sys.exit()
-                elif c == 'n':
-                    if i == len(sys.argv) - 1:
-                        print "Argument required."
-                        help()
-                        sys.exit()
-
-                    try:
-                        scankwargs["nbytes"] = int(sys.argv[i + 1])
-                    except ValueError:
-                        pass
-                    i += 1
-                elif c == 'p':
-                    if i == len(sys.argv) - 1:
-                        print "Argument required."
-                        help()
-                        sys.exit()
-                    ports += _split_port_csv(sys.argv[i + 1])
-                    i += 1
-                elif c == 's':
-                    sort = True
-                elif c == 't':
-                    if i == len(sys.argv) - 1:
-                        print "Argument required."
-                        help()
-                        sys.exit()
-
-                    try:
-                        timeout = float(sys.argv[i + 1])
-                    except ValueError:
-                        pass
-                    i += 1
-                elif c == 'y':
-                    yes_only = True
-                else:
-                    print "Invalid flag."
-                    help()
-                    sys.exit()
-        elif arg:
-            ips.append(arg)
-        i += 1
-    
-    if not ips: # no addresses, so scan the router prefix subdomain
-        ips = _get_router_prefix()
-        ips = ips[:ips.rfind('.')] # strip final number
-
-    if not ports:
-        ports = [21, 22, 25, 80, 8080]
-    scanner = SubdomainScanner(_scanclassbynames(names), ips, ports, timeout,
-        **scankwargs)
-    output = scanner.scan() # is a generator by default
-
-    if sort: # make the list pretty
-        try:
-            output = sorted(list(output), key = lambda t: t[0])
-        except KeyboardInterrupt:
-            sys.exit()
-    header = "Success\tAddress" # print a header
-    
-    if "response" in names:
-        header += "\tResponse"
-    print header
-    
     try:
-        for address, success, data in output:
-            if not data:
-                data = ''
-            data = data.encode("unicode-escape")
-            
-            if "response" in names:
-                if success:
-                    print "Yes\t%s:%u\t%s" % (address[0], address[1], data)
-                elif not yes_only:
-                    print "no\t%s:%u\t%s" % (address[0], address[1], data)
-            elif success:
-                print "Yes\t%s:%u" % address
-            elif not yes_only:
-                print "no\t%s:%u" % address
+        main()
     except KeyboardInterrupt:
-        sys.exit()
+        pass
+    sys.exit()
