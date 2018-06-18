@@ -93,6 +93,7 @@ class Polygon:
     def __str__(self):
         return str(tuple((v.magnitudes for v in self.vertices)))
 
-p = Polygon(Point(0, 0), Point(1, 0), Point(2, 2), Point(3, 0))
-print p
-print Point(2, 2) in p
+if __name__ == "__main__": # testing
+    p = Polygon(Point(0, 0), Point(1, 0), Point(2, 2), Point(3, 0))
+    print p
+    print Point(2, 2) in p
