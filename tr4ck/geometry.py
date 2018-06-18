@@ -37,11 +37,22 @@ class Point:
     def __init__(self, *magnitudes):
         self.magnitudes = magnitudes
 
+    def __eq__(self, other):
+        return self.magnitudes == other.magnitudes
+
     def euclidean_distance(self, other):
         """compute the Euclidean distance from this point to another"""
         diffs = [self.magnitudes[i] - other.magnitudes[i]
             for i in range(len(self.magnitudes))]
         return math.sqrt(sum((d ** 2 for d in diffs)))
+
+    def slope(self, other):
+        """return the 2D slope between the points"""
+        assert len(self.magnitudes) == 2 and len(other.magnitudes) == 2, \
+            "slope incalculable"
+        xdiff = other.magnitudes[1] - self.magnitudes[1]
+        ydiff = other.magnitudes[1] - self.magnitudes[1]
+        return ydiff / float(xdiff)
 
     def __str__(self):
         return str(self.magnitudes)
@@ -80,4 +91,8 @@ class Polygon:
         self.vertices = high + low
 
     def __str__(self):
-        return str(tuple(v for v in self.vertices))
+        return str(tuple((v.magnitudes for v in self.vertices)))
+
+p = Polygon(Point(0, 0), Point(1, 0), Point(2, 2), Point(3, 0))
+print p
+print Point(2, 2) in p
