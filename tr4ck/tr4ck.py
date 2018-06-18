@@ -3,6 +3,7 @@ import sys
 
 sys.path.append(os.path.realpath(__file__))
 
+import tr4ckdb
 import traffic
 import triangulate
 
@@ -12,4 +13,4 @@ from traffic analysis to host triangulation
 """
 
 if __name__ == "__main__":
-    traffic.PacketTracker("test", store = False).track()
+    traffic.PacketTracker(tr4ckdb.MACDB("test", store = False)).track()

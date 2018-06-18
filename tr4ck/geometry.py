@@ -28,7 +28,7 @@ class Circle:
         if euclidean_distance > radii_sum:
             return []
         elif euclidean_distance == radii_sum:
-            pass########1 point
+            pass######1 point
         pass#############2 points
 
 class Point:
