@@ -9,9 +9,14 @@ import tr4ckdb
 doc = """network traffic tracking/analysis"""
 
 class Analyst:
-    """base class for an analyst"""
+    """
+    base class for an analyst
+
+    the only common factor between analysts is that a database is required
+    """
 
     def __init__(self, db):
+        assert db, "db is required"
         self.db = db
 
 class Tracker:
@@ -41,7 +46,7 @@ class Tracker:
         """the main function"""
         raise NotImplementedError()
 
-class PacketTracker(tr4ckdb.MACDB, Tracker):
+class PacketTracker(Tracker):
     """packet collection"""
     
     def __init__(self, *args, **kwargs):

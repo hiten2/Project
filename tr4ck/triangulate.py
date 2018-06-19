@@ -26,6 +26,9 @@ class Triangulator:
         triangulate based on a set of circles
 
         algorithm:
-        ????
+        1. determine intersections and their overlap
+        2. remove outlying intersections
+        3. points of intersection + overlap -> rectangles
+        4. return the polygon formed by the overlapping rectangles
         """
         pass
