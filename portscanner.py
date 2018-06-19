@@ -27,7 +27,7 @@ def _get_router_prefix():
         return output[2]
     return
 
-def help():
+def _help():
     """print a help message"""
     print "scan specific ports of ADDRESSES\n" \
           "Usage: python portscanner.py [OPTIONS] [ADDRESSES]\n" \
@@ -69,7 +69,7 @@ def main():
             arg = arg[2:]
 
             if arg == "help":
-                help()
+                _help()
                 sys.exit()
             elif arg.startswith("nbytes="):
                 try:
@@ -97,19 +97,19 @@ def main():
                 yes_only = True
             else:
                 print "Invalid argument."
-                help()
+                _help()
                 sys.exit()
         elif arg.startswith('-'):
             arg = arg[1:]
 
             for c in arg:
                 if c == 'h':
-                    help()
+                    _help()
                     sys.exit()
                 elif c == 'n':
                     if i == len(sys.argv) - 1:
                         print "Argument required."
-                        help()
+                        _help()
                         sys.exit()
 
                     try:
@@ -120,7 +120,7 @@ def main():
                 elif c == 'p':
                     if i == len(sys.argv) - 1:
                         print "Argument required."
-                        help()
+                        _help()
                         sys.exit()
                     ports += _split_port_csv(sys.argv[i + 1])
                     i += 1
@@ -129,7 +129,7 @@ def main():
                 elif c == 't':
                     if i == len(sys.argv) - 1:
                         print "Argument required."
-                        help()
+                        _help()
                         sys.exit()
 
                     try:
@@ -141,7 +141,7 @@ def main():
                     yes_only = True
                 else:
                     print "Invalid flag."
-                    help()
+                    _help()
                     sys.exit()
         elif arg:
             ips.append(arg)

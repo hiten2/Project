@@ -38,240 +38,323 @@
 #   however, modification of this code and/or license,
 #   does NOT void this original license.
 
-__doc__ = """basic web database management"""
+__doc__ = """a string-based database"""
 
-import csv
 import fcntl
 import hashlib
 import os
-import thread
-import time
+import sys
+
+def _help():
+    print "a string-based database\n" \
+          "Usage: python db.py [OPTIONS] DIRECTORY ACTION [NAME [DATA]]\n" \
+          "OPTIONS\n" \
+          "\t-h, --help\tshow this text and exit\n" \
+          "DIRECTORY\n" \
+          "\tthe database directory\n" \
+          "ACTION\n" \
+          "\tclean\tclean the database (if it exists)\n" \
+          "\tcontains NAME\tdetermine whether an entry exists\n" \
+          "\delete NAME\tdelete an entry\n" \
+          "\tget NAME\tget an entry\n" \
+          "\tlist\tlist all entries as unicode-escaped strings\n" \
+          "\tset NAME [DATA]\tset an entry\n" \
+          "NAME\n" \
+          "\tan entry name (a string)\n" \
+          "DATA\n" \
+          "\tentry data (a string)"
 
 class DB:
     """
-    an extensible SHA-256-based database
+    an extensible string-based database
     
-    when storage is specified, directory/db.csv's rows resemble:
-    "unicode-escaped ID, SHA-256"
-    where SHA-256 represents the resource subdirectory,
-    and entries in directory/SHA-256 are timestamped (accurate to the second)
-    e.g. at timestamp T, ID's data is in "directory/SHA-256/T"
+    the database is made up of two main components:
+    1. the database file
+        a (CR)LF-separated list of unicode-escaped entry names
+        which MAY or MAY NOT exist
+    2. entries
+        the corresponding raw data for an entry name,
+        stored at "directory/hashed-entry-name"
 
-    this path structure can be taken advantage of:
-    store can be called with anything as a timestamp
-    e.g. store(data, id, "data.txt") could store data
-    into "directory/SHA-256/data.txt"
+    the database model is dict-like, but is intended for extensibility
+    through its simplicity
+    """
 
-    this string-based structure could also be taken advantage
-    of in order to represent sub-databases
-    e.g. entry "A.1.name"
-    could represent database 'A''s entry '1''s "name" value
-
-    concurrency-safe across multiple threads and processes
-
-    existence of a record is contingent upon BOTH its presence in the
-    database file and its existence on-disk
-    """#######################ensure parallel safety
-    ##############fix encoding issues
-    ###########clean
-    ##############command-line options
-
-    def __init__(self, directory = os.getcwd(), db_mode = "ab",
-            concurrent = True, enter = True):
-        self.concurrent = concurrent
-        self._db_csv = os.path.join(directory, "db.csv")
-        self._db_csv_fp = None
-        self._db_csv_writer = None
-        self.db_mode = db_mode
-        self._decodeid = lambda i: str(i).decode("unicode-escape")
+    def __init__(self, directory = os.getcwd(), enter = True, hash = "sha256"):
+        self._db_fp = None
+        self._db_path = os.path.join(directory, "db.csv")
         self.directory = directory
-        self._encodeid = lambda i: str(i).encode("unicode-escape")
+        hash = getattr(hashlib, hash)
+        self._hash = lambda s: hash(str(s)).hexdigest()
         
         if enter:
             self.__enter__()
 
     def clean(self):
-        """
-        clean and reload "db.csv"
-
-        remove repeats and non-existent entries
-        """
-        _db_csv_fp = open(self._db_csv, "rb")
-        rows = set() # prevent repeats
+        """clean "db.csv" of redundant/non-existent entries"""
+        locked = True
         
-        fcntl.flock(self._db_csv_fp.fileno(), fcntl.LOCK_EX)
+        try:
+            fcntl.flock(self._db_fp.fileno(), fcntl.LOCK_EX)
+        except IOError:
+            locked = False
+        names = self.list(self._db_fp)
+        self._db_fp.seek(0, os.SEEK_SET)
 
-        for entry, hash in csv.reader(_db_csv_fp):
-            if row and self.exists(hash): # exists
-                rows.add(tuple(row))
-        _db_csv_fp.close()
-        self._db_csv_fp.seek(0, os.SEEK_SET)
+        try:
+            self._db_fp.truncate()
+        except (IOError, OSError):
+            raise OSError("failed to truncate database")
+        
+        try:
+            for n in names:
+                self._register(n)
+        except (IOError, OSError):
+            raise OSError("failed to rewrite database")
 
-        for row in rows: # rewrite rows
-            self._db_csv_writer.writerow(row)
-        os.fdatasync(self._db_csv_fp.fileno())
-        fcntl.flock(self._db_csv_fp.fileno(), fcntl.LOCK_UN)
+        if locked:
+            try:
+                fcntl.flock(self._db_fp.fileno(), fcntl.LOCK_EX)
+            except IOError:
+                pass
     
+    def __contains__(self, name):
+        """return whether an entry exists"""
+        return os.path.exists(self._generate_path(name))
+
     def __del__(self):
         self.__exit__()
+
+    def __delitem__(self, name):
+        fp = None
+        locked = True
+        
+        if not name in self:
+            return
+
+        try:
+            fp = open(self._generate_path(name), "rb")
+        except (IOError, OSError): # unknown error
+            raise OSError("can't open entry for deletion")
+        
+        try:
+            fcntl.flock(fp.fileno(), fcntl.LOCK_EX)
+        except IOError:
+            locked = False
+        
+        try:
+            os.unlink(self._generate_path(name))
+        except OSError:
+            raise OSError("failed to delete entry")
+        self.clean()
+
+        if locked:
+            try:
+                fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
+            except IOError:
+                pass
+
+        try:
+            fp.close()
+        except (IOError, OSError):
+            pass
     
     def __enter__(self):
         if not os.path.exists(self.directory):
             os.makedirs(self.directory)
-        opened = not self._db_csv_fp
         
-        if opened:
-            self._db_csv_fp = open(self._db_csv, self.db_mode)
-
-        if opened or not self._db_csv_writer:
-            self._db_csv_writer = csv.writer(self._db_csv_fp)
-
-        with open(self._db_csv, "rb") as _fp:
-            if not _fp.readline(): # write header
-                self._db_csv_writer.writerow(("unicode-escaped-id", "sha-256"))
-        return self
-
-    def exists(self, id, timestamp = None):
-        """return whether an entry exists and is non-empty"""
-        id = self._encodeid(id)
-        timestamps = self.timestamps(id)
-
-        if timestamp:
-            return timestamp in timestamps
-        return not not timestamps
+        if not self._db_fp or self._db_fp.closed:
+            self._db_fp = open(self._db_path, "a+b")
 
     def __exit__(self):
-        if self._db_csv_fp:
-            self._db_csv_fp.close()
+        if self._db_fp:
+            try:
+                self._db_fp.close()
+            except (IOError, OSError):
+                pass
 
-    def _generate_directory(self, id):
-        """generate the local directory for a ID"""
-        id = self._encodeid(id)
-        return os.path.join(self.directory, self._hash_id(id))
-    
-    def _generate_path(self, id, timestamp = None):
-        """generate the local, timestamped path for a ID"""
-        id = self._encodeid(id)
-        
-        if not timestamp:
-            timestamp = time.time()
-        return os.path.join(self._generate_directory(id), str(timestamp))
+    def _generate_path(self, name):
+        """return the hashed equivalent of a name"""
+        return os.path.join(self.directory, self._hash(name))
 
-    def _hash_id(self, id):
-        """return a SHA-256 hash for a ID"""
-        id = self._encodeid(id)
-        return hashlib.sha256(id).hexdigest()
-    
-    def _register(self, id):
-        """
-        add a ID to the CSV database
-        a call to this function implies that an entry for ID already exists
-
-        note that there is no cross-validation, so there may be repeats
-        in "db.csv"
-        """
-        id = self._encodeid(id)
-        _dir = self._generate_directory(id)
-        _hash = os.path.basename(_dir)
-        
-        if self.concurrent:
-            fcntl.flock(self._db_csv_fp.fileno(), fcntl.LOCK_EX)
-        self._db_csv_writer.writerow((id, _hash))
-        self._db_csv_fp.flush()
-
-        if self.concurrent:
-            fcntl.flock(self._db_csv_fp.fileno(), fcntl.LOCK_UN)
-
-    def retrieve(self, id, timestamp = None):
-        """
-        retrieve data on a ID, optionally with a specific timestamp
-        if no timestamp is provided, the last entry will be used
-        """
+    def __getitem__(self, name):
+        """retrieve data"""
         data = None
-        _exception = None
-        id = self._encodeid(id)
-        timestamp = str(timestamp)
-        timestamps = self.timestamps(id)
+        fp = None
+        locked = True
+        path = self._generate_path(name)
         
-        if not timestamps or (timestamp and not timestamp in timestamps):
-            return
-        elif not timestamp:
-            timestamp = timestamps[-1]
-        _path = self._generate_path(id, timestamp)
-        _dir = os.path.dirname(_path)
+        if not name in self:
+            raise ValueError("no such entry")
+        elif not os.access(path, os.R_OK):
+            raise OSError("entry unreadable")
 
-        if not _path:
-            return
-        _fp = open(_path, "rb")
-
-        if self.concurrent:
-            fcntl.flock(_fp.fileno(), fcntl.LOCK_EX)
-        
         try:
-            data = _fp.read()
-        except Exception as _exception:
+            fp = open(path, "rb")
+        except (IOError, OSError): # unknown error
+            raise OSError("can't open entry")
+
+        try:
+            fcntl.flock(fp.fileno(), fcntl.LOCK_EX)
+        except IOError:
+            locked = False
+
+        try:
+            data = fp.read()
+        except (IOError, OSError): # unknown error
             pass
 
-        if self.concurrent:
-            fcntl.flock(_fp.fileno(), fcntl.LOCK_UN)
-        _fp.close()
+        if locked:
+            try:
+                fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
+            except IOError:
+                pass
+        
+        try:
+            fp.close()
+        except (IOError, OSError):
+            pass
 
-        if _exception:
-            raise _exception
+        if data == None:
+            raise OSError("failed to read entry")
         return data
 
-    def store(self, data, id, timestamp = None, mode = "wb"):
-        """store ID data and return the timestamp"""
-        _exception = None
-        id = self._encodeid(id)
-        _path = self._generate_path(id, timestamp)
-        _existed = os.path.exists(_path)
-        _dir = os.path.dirname(_path)
+    def list(self, fp = None):
+        """
+        return a list of all the entries (names only)
+        
+        this function only locks when fp is None
+        """
+        locked = False
+        opened = fp == None
 
-        if not os.path.exists(_dir):
-            os.makedirs(_dir)
-        _fp = open(_path, mode)
+        if opened:
+            try:
+                fp = open(self._db_path, "rb")
+            except (IOError, OSError):
+                raise OSError("failed to open database")
 
-        if self.concurrent:
-            fcntl.flock(_fp.fileno(), fcntl.LOCK_EX)
+            try:
+                fcntl.flock(fp.fileno(), fcntl.LOCK_EX)
+                locked = True
+            except IOError:
+                pass
+        names = set()
 
         try:
-            if not isinstance(data, bytearray) and not isinstance(data, bytes):
-                data = bytearray(data)
-            _fp.write(data)
-        except Exception as _exception:
+            for l in fp.readlines():
+                if l.endswith("\r\n"):
+                    l = l[:-2]
+                elif l.endswith('\n'):
+                    l = l[:-1]
+                l = l.decode("unicode-escape")
+                
+                if l in self:
+                    names.add(l)
+        except (IOError, OSError): # unknown error
+            raise OSError("failed to read database")
+
+        if opened:
+            if locked:
+                try:
+                    fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
+                except IOError:
+                    pass
+            
+            try:
+                fp.close()
+            except (IOError, OSError):
+                pass
+        return sorted(names)
+    
+    def _register(self, name):
+        """register a name with the database"""
+        try:
+            self._db_fp.write(name.encode("unicode-escape"))
+            self._db_fp.write("\r\n")
+            os.fdatasync(self._db_fp.fileno())
+        except (AttributeError, IOError, OSError):
+            raise OSError("registration failed")
+    
+    def __setitem__(self, name, data):
+        """store a name mapped to data"""
+        fp = None
+        locked = True
+        path = self._generate_path(name)
+        
+        try:
+            fp = open(path, "wb")
+        except (IOError, OSError): # unknown error
+            raise OSError("can't open entry")
+
+        try:
+            fcntl.flock(fp.fileno(), fcntl.LOCK_EX)
+        except IOError:
+            locked = False
+
+        try:
+            fp.write(data)
+            os.fdatasync(fp.fileno())
+        except (IOError, OSError): # unknown error
+            raise OSError("failed to write entry")
+        self._register(name)
+        
+        if locked:
+            try:
+                fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
+            except IOError:
+                pass
+        
+        try:
+            fp.close()
+        except (IOError, OSError):
             pass
 
-        if self.concurrent:
-            fcntl.flock(_fp.fileno(), fcntl.LOCK_UN)
-        _fp.close()
+if __name__ == "__main__":
+    action = None
+    data = ''
+    db = None
+    directory = None
+    name = None
+    
+    if len(sys.argv) < 3:
+        _help()
+        sys.exit()
 
-        if _exception:
-            raise _exception
-
-        if not _existed:
-            self._register(id)
-        return os.path.basename(_path) # refers to timestamp
-
-    def timestamps(self, id):
-        """return the sorted, recorded timestamps for a ID"""
-        id = self._encodeid(id)
-        _dir = self._generate_directory(id)
+    for arg in sys.argv[1:]:
+        if arg in ("-h", "--help"):
+            _help()
+            sys.exit()
+    directory, action = sys.argv[1:3]
+    action = action.lower()
+    
+    if action in ("contains", "delete", "get", "set"):
+        if len(sys.argv) < 4:
+            print "Missing entry name."
+            _help()
+            sys.exit()
+        name = sys.argv[3]
         
-        if os.path.exists(_dir):
-            return sorted(os.listdir(_dir))
-        return []
-
-    def ids(self):
-        """return a list of IDs stored in the database"""
-        _fp = open(self._db_csv, "rb")
-        _fp_reader = csv.reader(_fp)
-
-        if self._concurrent:
-            fcntl.flock(_fp.fileno(), fcntl.LOCK_EX)
-        ids = list(_fp_reader)
-
-        if self._concurrent:
-            fcntl.flock(_fp.fileno(), fcntl.LOCK_UN)
-        _fp.close()
-        return [self._decodeid(i) for i in ids]
+        if action == "set" and len(sys.argv) > 4:
+            data = sys.argv[4]
+    elif not action in ("clean", "list"):
+        print "Invalid action."
+        _help()
+        sys.exit()
+    db = DB(directory)
+    
+    if action == "clean":
+        db.clean()
+    elif action == "contains":
+        print name in db
+    elif action == "delete":
+        del db[name]
+    elif action == "get":
+        sys.stdout.write(db[name])
+        sys.stdout.flush()
+    elif action == "list":
+        for n in db.list():
+            print n.encode("unicode-escape")
+    elif action == "set":
+        db[name] = data
+    db.__exit__()

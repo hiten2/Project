@@ -52,7 +52,7 @@ def handle_connection(conn, directory = os.getcwd(), relative = False):
         serve_head(conn, resource)
     close(conn)
 
-def help():
+def _help():
     print "a simple, functional HTTP server\n" \
           "Usage: python httpserver.py [OPTIONS] [INTERFACE][:PORT]\n" \
           "OPTIONS\n" \
@@ -196,25 +196,25 @@ if __name__ == "__main__":
             if arg == "backlog":
                 if len(sys.argv) == i + 1:
                     print "Required argument."
-                    help()
+                    _help()
                     sys.exit()
 
                 try:
                     backlog = int(sys.argv[i + 1])
                 except ValueError:
                     print "Invalid backlog."
-                    help()
+                    _help()
                     sys.exit()
                 i += 1
             elif arg == "directory":
                 if len(sys.argv) == i + 1:
                     print "Required argument."
-                    help()
+                    _help()
                     sys.exit()
                 directory = sys.argv[i + 1]
                 i += 1
             elif arg == "help":
-                help()
+                _help()
                 sys.exit()
             elif arg == "relative":
                 relative = True
@@ -222,32 +222,32 @@ if __name__ == "__main__":
                 threaded = True
             else:
                 print "Invalid argument."
-                help()
+                _help()
                 sys.exit()
         elif arg.startswith('-'):
             for c in arg[1:]:
                 if c == 'b':
                     if len(sys.argv) == i + 1:
                         print "Required argument."
-                        help()
+                        _help()
                         sys.exit()
 
                     try:
                         backlog = int(sys.argv[i + 1])
                     except ValueError:
                         print "Invalid backlog."
-                        help()
+                        _help()
                         sys.exit()
                     i += 1
                 elif c == 'd':
                     if len(sys.argv) == i + 1:
                         print "Required argument."
-                        help()
+                        _help()
                         sys.exit()
                     directory = sys.argv[i + 1]
                     i += 1
                 elif c == 'h':
-                    help()
+                    _help()
                     sys.exit()
                 elif c == 'r':
                     relative = True
@@ -255,7 +255,7 @@ if __name__ == "__main__":
                     threaded = True
                 else:
                     print "Invalid option."
-                    help()
+                    _help()
                     sys.exit()
         else:
             interface = arg
@@ -270,7 +270,7 @@ if __name__ == "__main__":
                         raise ValueError()
                 except ValueError:
                     print "Invalid port."
-                    help()
+                    _help()
                     sys.exit()
         i += 1
     mainloop(directory, relative, (interface, port), backlog)

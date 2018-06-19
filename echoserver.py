@@ -46,7 +46,7 @@ def echo_http(sock):
         return
     echo(sock)
 
-def help():
+def _help():
     """print help info to STDOUT"""
     print "IPv4 echo server\n" \
           "Usage: python echoserver.py [OPTIONS] [ADDRESS]\n" \
@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     for arg in sys.argv[1:]:
         if arg in ("-h", "--help"):
-            help()
+            _help()
             exit()
         elif arg == "--http":
             use_http = True

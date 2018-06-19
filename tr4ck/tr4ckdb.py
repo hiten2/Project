@@ -16,12 +16,12 @@ class Tr4ckDB(db.DB):
     """
     database base class for tracking, with optional dummy functionality
     
-    uses the _generate_id function to categorize a packet
+    uses the _generate_id function to categorize data
     """
     
     def __init__(self, directory = os.getcwd(), db_mode = "ab",
-            concurrent = True, store = True):
-        db.DB.__init__(self, directory, db_mode, concurrent, enter = store)
+            hash = "sha256", store = True):
+        db.DB.__init__(self, directory, store, hash)
         
         self._store = store
 
@@ -33,12 +33,10 @@ class Tr4ckDB(db.DB):
         """split an ID generated via self._generate_id"""
         raise NotImplementedError()
     
-    def store(self, packet, mode = "wb"):
-        """store the packet based on it addresses"""
+    def store(self, data):
+        """an intellgent wrapper for self.__setitem__"""
         if self._store:
-            return db.DB.store(self, str(packet), self._generate_id(packet),
-                mode = mode)
-        return
+            self[self._generate_id(data)] = str(data)
 
 class MACDB(Tr4ckDB):
     """
