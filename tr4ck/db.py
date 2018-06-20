@@ -55,8 +55,9 @@ def _help():
           "ACTION\n" \
           "\tclean\tclean the database (if it exists)\n" \
           "\tcontains NAME\tdetermine whether an entry exists\n" \
-          "\delete NAME\tdelete an entry\n" \
+          "\tdelete NAME\tdelete an entry\n" \
           "\tget NAME\tget an entry\n" \
+          "\tinit\tinitialize the database with \"db.csv\" (default)\n" \
           "\tlist\tlist all entries as unicode-escaped strings\n" \
           "\tset NAME [DATA]\tset an entry\n" \
           "NAME\n" \
@@ -78,64 +79,67 @@ class DB:
 
     the database model is dict-like, but is intended for extensibility
     through its simplicity
+    
+    the functions follow a simple model for integrity purposes:
+    1. enter as needed
+    2. open any files
+    3. lock files
+    4. save any exceptions during the operation
+    5. unlock files
+    6. close any files
+    7. raise any exceptions
+    8. return any data
     """
 
-    def __init__(self, directory = os.getcwd(), enter = True, hash = "sha256"):
+    def __init__(self, directory = os.getcwd(), hash = "sha256"):
         self._db_fp = None
         self._db_path = os.path.join(directory, "db.csv")
         self.directory = directory
         hash = getattr(hashlib, hash)
         self._hash = lambda s: hash(str(s)).hexdigest()
-        
-        if enter:
-            self.__enter__()
 
     def clean(self):
         """clean "db.csv" of redundant/non-existent entries"""
+        self.__enter__()
+        exception = None
         locked = True
         
         try:
             fcntl.flock(self._db_fp.fileno(), fcntl.LOCK_EX)
         except IOError:
             locked = False
-        names = self.list(self._db_fp)
-        self._db_fp.seek(0, os.SEEK_SET)
-
-        try:
-            self._db_fp.truncate()
-        except (IOError, OSError):
-            raise OSError("failed to truncate database")
         
         try:
+            names = self.list()
+            self._db_fp.seek(0, os.SEEK_SET)
+            self._db_fp.truncate()
+
             for n in names:
                 self._register(n)
-        except (IOError, OSError):
-            raise OSError("failed to rewrite database")
-
+        except Exception as exception:
+            pass
+        
         if locked:
             try:
                 fcntl.flock(self._db_fp.fileno(), fcntl.LOCK_EX)
             except IOError:
                 pass
+
+        if exception:
+            raise exception
     
     def __contains__(self, name):
-        """return whether an entry exists"""
+        """return whether an entry exists (not whether it's in the database)"""
         return os.path.exists(self._generate_path(name))
 
     def __del__(self):
         self.__exit__()
 
     def __delitem__(self, name):
-        fp = None
+        """delete an entry"""
+        exception = None
         locked = True
-        
-        if not name in self:
-            return
-
-        try:
-            fp = open(self._generate_path(name), "rb")
-        except (IOError, OSError): # unknown error
-            raise OSError("can't open entry for deletion")
+        fp = open(self._generate_path(name), "rb") # we need a lock
         
         try:
             fcntl.flock(fp.fileno(), fcntl.LOCK_EX)
@@ -144,10 +148,10 @@ class DB:
         
         try:
             os.unlink(self._generate_path(name))
-        except OSError:
-            raise OSError("failed to delete entry")
-        self.clean()
-
+            self.clean()
+        except Exception as exception:
+            pass
+        
         if locked:
             try:
                 fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
@@ -158,16 +162,20 @@ class DB:
             fp.close()
         except (IOError, OSError):
             pass
+
+        if exception:
+            raise exception
     
     def __enter__(self):
         if not os.path.exists(self.directory):
             os.makedirs(self.directory)
         
-        if not self._db_fp or self._db_fp.closed:
+        if not isinstance(self._db_fp, file) or self._db_fp.closed:
             self._db_fp = open(self._db_path, "a+b")
+        return self
 
-    def __exit__(self):
-        if self._db_fp:
+    def __exit__(self, *exception):
+        if isinstance(self._db_fp, file):
             try:
                 self._db_fp.close()
             except (IOError, OSError):
@@ -178,21 +186,11 @@ class DB:
         return os.path.join(self.directory, self._hash(name))
 
     def __getitem__(self, name):
-        """retrieve data"""
-        data = None
-        fp = None
+        """retrieve an entry"""
+        data = ''
+        exception = None
+        fp = open(self._generate_path(name), "rb")
         locked = True
-        path = self._generate_path(name)
-        
-        if not name in self:
-            raise ValueError("no such entry")
-        elif not os.access(path, os.R_OK):
-            raise OSError("entry unreadable")
-
-        try:
-            fp = open(path, "rb")
-        except (IOError, OSError): # unknown error
-            raise OSError("can't open entry")
 
         try:
             fcntl.flock(fp.fileno(), fcntl.LOCK_EX)
@@ -201,9 +199,9 @@ class DB:
 
         try:
             data = fp.read()
-        except (IOError, OSError): # unknown error
+        except Exception as exception:
             pass
-
+        
         if locked:
             try:
                 fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
@@ -214,35 +212,27 @@ class DB:
             fp.close()
         except (IOError, OSError):
             pass
-
-        if data == None:
-            raise OSError("failed to read entry")
+        
+        if exception:
+            raise exception
         return data
 
-    def list(self, fp = None):
-        """
-        return a list of all the entries (names only)
+    def list(self):
+        """return an unsorted list of all the entries (names only)"""
+        self.__enter__()
+        exception = None
+        locked = True
         
-        this function only locks when fp is None
-        """
-        locked = False
-        opened = fp == None
-
-        if opened:
-            try:
-                fp = open(self._db_path, "rb")
-            except (IOError, OSError):
-                raise OSError("failed to open database")
-
-            try:
-                fcntl.flock(fp.fileno(), fcntl.LOCK_EX)
-                locked = True
-            except IOError:
-                pass
+        try:
+            fcntl.flock(self._db_fp.fileno(), fcntl.LOCK_EX)
+        except IOError:
+            locked = False
         names = set()
 
         try:
-            for l in fp.readlines():
+            self._db_fp.seek(0, os.SEEK_SET)
+            
+            for l in self._db_fp.readlines():
                 if l.endswith("\r\n"):
                     l = l[:-2]
                 elif l.endswith('\n'):
@@ -251,41 +241,46 @@ class DB:
                 
                 if l in self:
                     names.add(l)
-        except (IOError, OSError): # unknown error
-            raise OSError("failed to read database")
-
-        if opened:
-            if locked:
-                try:
-                    fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
-                except IOError:
-                    pass
-            
+        except Exception as exception:
+            pass
+        
+        if locked:
             try:
-                fp.close()
-            except (IOError, OSError):
+                fcntl.flock(self._db_fp.fileno(), fcntl.LOCK_UN)
+            except IOError:
                 pass
-        return sorted(names)
+
+        if exception:
+            raise exception
+        return list(names)
     
     def _register(self, name):
         """register a name with the database"""
+        self.__enter__()
+        exception = None
+        
         try:
             self._db_fp.write(name.encode("unicode-escape"))
             self._db_fp.write("\r\n")
+            self._db_fp.flush()
             os.fdatasync(self._db_fp.fileno())
-        except (AttributeError, IOError, OSError):
-            raise OSError("registration failed")
+        except Exception as exception:
+            pass
+
+        if exception:
+            raise exception
     
     def __setitem__(self, name, data):
-        """store a name mapped to data"""
-        fp = None
-        locked = True
-        path = self._generate_path(name)
+        """
+        store a name mapped to data
         
-        try:
-            fp = open(path, "wb")
-        except (IOError, OSError): # unknown error
-            raise OSError("can't open entry")
+        this function is rather slow, as it calls
+        both file.flush and os.fdatasync
+        """
+        self.__enter__()
+        exception = None
+        fp = open(self._generate_path(name), "wb")
+        locked = True
 
         try:
             fcntl.flock(fp.fileno(), fcntl.LOCK_EX)
@@ -294,10 +289,11 @@ class DB:
 
         try:
             fp.write(data)
+            fp.flush()
             os.fdatasync(fp.fileno())
-        except (IOError, OSError): # unknown error
-            raise OSError("failed to write entry")
-        self._register(name)
+            self._register(name)
+        except Exception as exception:
+            pass
         
         if locked:
             try:
@@ -309,6 +305,9 @@ class DB:
             fp.close()
         except (IOError, OSError):
             pass
+        
+        if exception:
+            raise exception
 
 if __name__ == "__main__":
     action = None
@@ -337,7 +336,7 @@ if __name__ == "__main__":
         
         if action == "set" and len(sys.argv) > 4:
             data = sys.argv[4]
-    elif not action in ("clean", "list"):
+    elif not action in ("clean", "init", "list"):
         print "Invalid action."
         _help()
         sys.exit()
@@ -357,4 +356,5 @@ if __name__ == "__main__":
             print n.encode("unicode-escape")
     elif action == "set":
         db[name] = data
+    # otherwise, action == "init"
     db.__exit__()

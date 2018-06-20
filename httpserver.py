@@ -3,6 +3,8 @@ import socket
 import sys
 import thread
 
+__doc__ = """a simple, functional HTTP server"""
+
 def bad_request(conn):
     error_close(conn, 400, "bad request")
 
@@ -37,9 +39,13 @@ def handle_connection(conn, directory = os.getcwd(), relative = False):
         bad_request(conn)
         return
     request_type = request_type.lower()
+    resource = resource.lstrip('/')
 
+    if '?' in resource:
+        resource = resource[:resource.find('?')]
+    
     if not relative:
-        resource = os.path.normpath(resource).lstrip('/')
+        resource = os.path.normpath(resource)
     resource = os.path.join(directory, resource)
     
     if not request_type in ("head", "get"):

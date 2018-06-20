@@ -21,7 +21,7 @@ class Tr4ckDB(db.DB):
     
     def __init__(self, directory = os.getcwd(), db_mode = "ab",
             hash = "sha256", store = True):
-        db.DB.__init__(self, directory, store, hash)
+        db.DB.__init__(self, directory, hash)
         
         self._store = store
 
@@ -34,7 +34,7 @@ class Tr4ckDB(db.DB):
         raise NotImplementedError()
     
     def store(self, data):
-        """an intellgent wrapper for self.__setitem__"""
+        """an intelligent wrapper for self.__setitem__"""
         if self._store:
             self[self._generate_id(data)] = str(data)
 
