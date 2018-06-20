@@ -10,5 +10,5 @@
       - chord-based (?) algorithm
     - `geometry.Polygon.__contains__`
       - ray casting algorithm
-  - `triangulate.Triangulator.triangulate`
+  - `triangulate.triangulate`
     - figure out an algorithm
