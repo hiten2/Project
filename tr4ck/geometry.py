@@ -31,26 +31,17 @@ class Circle:
             pass######1 point
         pass#############2 points
 
-class Point:
+class Point(tuple):
     """basic representation for a point"""
 
-    def __init__(self, *magnitudes):
-        self.magnitudes = magnitudes
-
-    def __eq__(self, other):
-        return self.magnitudes == other.magnitudes
+    def __new__(_class, *magnitudes):
+        return tuple.__new__(_class, magnitudes)
 
     def euclidean_distance(self, other):
         """compute the Euclidean distance from this point to another"""
         diffs = [self[i] - other[i]
             for i in range(len(self))]
         return math.sqrt(sum((d ** 2 for d in diffs)))
-
-    def __getitem__(self, index):
-        return self.magnitudes[index]
-
-    def __len__(self):
-        return len(self.magnitudes)
     
     def slope(self, other):
         """return the 2D slope between the points"""
@@ -58,9 +49,6 @@ class Point:
         xdiff = other[1] - self[1]
         ydiff = other[1] - self[1]
         return ydiff / float(xdiff)
-
-    def __str__(self):
-        return str(self.magnitudes)
 
 class Polygon:
     """representation for a 2D polygon"""
@@ -75,7 +63,24 @@ class Polygon:
         self.vertices = tuple(self.vertices)
 
     def __contains__(self, point):#############seems to work, but questionable
-        """ray casting algorithm for the point-in-polygon problem"""
+        """
+        ray casting algorithm for the point-in-polygon problem
+        
+        the general algorithm casts a ray towards (+) infinity
+        in the X direction
+        
+        breakdown:
+        
+        count = 0
+        
+        for edge in polygon
+            if edge isn't in the direction (X or Y) the ray casts
+                continue
+            
+            if edge intersects within valid range
+                count += 1
+        contains = count > 0 and count isn't divisible by 2
+        """
         nintersects = 0
         ray_y = point[1]
         
@@ -83,20 +88,22 @@ class Polygon:
             a = self.vertices[i]
             b = self.vertices[(i + 1) % len(self.vertices)] # allow wrap-around
             
-            if max(a[0], b[0]) < point[0]: # only cast to the right
+            if max(a[0], b[0]) < point[0]: # bad domain
                 continue
             
-            if ray_y >= min(a[1], b[1]) and ray_y <= max(a[1], b[1]):
-                try:
-                    m = a.slope(b)
-                except ZeroDivisionError: # vertical line
-                    nintersects += 1
-                    continue
-                leftmost = sorted((a, b), key = lambda p: p[0])[0]
-                eq_y_at_point = m * (point[0] - a[0]) + a[1]
+            if ray_y < min(a[1], b[1]) or ray_y > max(a[1], b[1]): # bad range
+                continue
+            
+            try:
+                m = a.slope(b)
+            except ZeroDivisionError: # vertical line
+                nintersects += 1
+                continue
+            leftmost = sorted((a, b), key = lambda p: p[0])[0]
+            eq_y_at_point = m * (point[0] - a[0]) + a[1]
 
-                if leftmost[1] <= ray_y and eq_y_at_point <= ray_y:
-                    nintersects += 1
+            if leftmost[1] <= ray_y and eq_y_at_point <= ray_y:
+                nintersects += 1
         return nintersects and nintersects % 2
 
     def normalize(self):
@@ -126,7 +133,7 @@ class Polygon:
         self.vertices = high + low
 
     def __str__(self):
-        return str(tuple((v.magnitudes for v in self.vertices)))
+        return str(self.vertices)
 
 if __name__ == "__main__": # testing
     p = Point(2, 2)
