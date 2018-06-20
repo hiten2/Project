@@ -252,7 +252,7 @@ class DB:
 
         if exception:
             raise exception
-        return list(names)
+        return sorted(names)
     
     def _register(self, name):
         """register a name with the database"""
