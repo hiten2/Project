@@ -1,6 +1,6 @@
 import math
 
-__doc__ = """geometry"""
+__doc__ = """Euclidean geometry"""
 
 class Circle:
     """circle representation"""
@@ -15,21 +15,29 @@ class Circle:
         return math.pi * self.radius ** 2
 
     def circumference(self):
-        return math.pi * 2 * self.radius
+        return math.pi * self.diameter()
 
     def __contains__(self, point):
         return self.center.euclidean_distance(point) <= self.radius
+
+    def diameter(self):
+        return 2 * self.radius
+
+    def __eq__(self, other):
+        return self.center == other.center and self.radius == other.radius
 
     def intersect(self, other):#########not done
         """determine the points of intersection with another circle"""
         euclidean_distance = self.center.euclidean_distance(other.center)
         radii_sum = self.radius + other.radius
         
-        if euclidean_distance > radii_sum:
+        if euclidean_distance > radii_sum: # no intersection
             return []
-        elif euclidean_distance == radii_sum:
-            pass######1 point
-        pass#############2 points
+        elif euclidean_distance == radii_sum: # 1 point of intersection
+            pass
+        # 2 points of intersection
+
+        pass
 
 class Point(tuple):
     """basic representation for a point"""
@@ -51,7 +59,7 @@ class Point(tuple):
         return ydiff / float(xdiff)
 
 class Polygon:
-    """representation for a 2D polygon"""
+    """representation for a polygon"""
 
     def __init__(self, *vertices):
         self.vertices = []
@@ -64,7 +72,7 @@ class Polygon:
 
     def __contains__(self, ray):
         """
-        ray casting algorithm for the point-in-polygon problem
+        2D ray casting algorithm for the point-in-polygon problem
         
         the general algorithm casts a ray towards (+) infinity
         in the X direction
@@ -114,9 +122,12 @@ class Polygon:
                         intersected_vertices.append(intersect)
         return count and count % 2
 
+    def __eq__(self, other):
+        return self.vertices == other.vertices
+
     def normalize(self):
         """
-        remove overlapping line segments by rearranging order
+        remove overlapping 2D line segments by rearranging order
         of vertices as such:
         1. split into two halves by Y-value
         2. sort upper half by X-values, from least to greatest
@@ -124,6 +135,9 @@ class Polygon:
         4. new vertices = upper half + lower half
         
         the resulting polygon may not be congruent to the original
+
+        e.g. Polygon((0, 0), (1, 1), (0, 1), (1, 0))
+            -> Polygon((0, 1), (1, 1), (1, 0), (0, 0))
         """
         high = []
         low = []
@@ -138,7 +152,7 @@ class Polygon:
                 low.append(v)
         high = sorted(high, key = lambda v: v[0])
         low = sorted(low, key = lambda v: v[0], reverse = True)
-        self.vertices = high + low
+        self.vertices = tuple(high + low)
 
     def __str__(self):
-        return str(self.vertices)
+        return "Polygon" + str(tuple(self.vertices))
