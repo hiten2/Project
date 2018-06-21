@@ -23,7 +23,7 @@ class Tracker:
     """
     base class for generalized tracking
     
-    a tracker maintains a (dummy) database of internet traffic
+    a tracker maintains a database of internet traffic
     """
 
     def __init__(self, db, filter = lambda p: True):
@@ -36,11 +36,12 @@ class Tracker:
         if self._filter(data):
             id = self.db._generate_id(data)
             
-            if self.db._store:
-                print id, "stored to",
-                self.db._generate_path(id, self.db.store(data))
-            else:
-                print id
+            if not id == None:
+                if self.db._store:
+                    print id, "stored to",
+                    self.db._generate_path(id, self.db.store(data))
+                else:
+                    print id
     
     def track(self):
         """the main function"""
@@ -51,8 +52,6 @@ class PacketTracker(Tracker):
     
     def __init__(self, *args, **kwargs):
         Tracker.__init__(self, *args, **kwargs)
-
-        assert isinstance(self.db, tr4ckdb.MACDB), "db must be a tr4ckdb.MACDB"
     
     def track(self):
         """sniff packets into the database"""

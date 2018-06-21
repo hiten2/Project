@@ -10,4 +10,5 @@
   - `geometry`
     - `geometry.Circle.intersect`
     - ~~`geometry.Polygon.__contains__`~~
+  - `triangulate._polygon_to_kml`
   - `triangulate.triangulate`

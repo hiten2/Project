@@ -1,4 +1,5 @@
 import os
+from scapy.layers import inet
 import sys
 
 sys.path.append(os.path.realpath(__file__))
@@ -25,12 +26,12 @@ class Tr4ckDB(db.DB):
         
         self._store = store
 
-    def _generate_id(self, packet):
-        """return the described ID for a packet"""
+    def _generate_id(self, *args, **kwargs):
+        """return the described ID for some data"""
         raise NotImplementedError()
 
-    def _split_id(self, id):
-        """split an ID generated via self._generate_id"""
+    def _parse_id(self, id):
+        """parse an ID generated via self._generate_id"""
         raise NotImplementedError()
     
     def store(self, data):
@@ -38,19 +39,48 @@ class Tr4ckDB(db.DB):
         if self._store:
             self[self._generate_id(data)] = str(data)
 
-class MACDB(Tr4ckDB):
+class DirectedDB(Tr4ckDB):
     """
-    MAC-based database
+    a directed database,
+    with IDs formatted as "source -> destination"
+    """
     
-    packets are stored in the following format:
-    "source MAC -> destination MAC"
-    """
-
     def __init__(self, *args, **kwargs):
         Tr4ckDB.__init__(self, *args, **kwargs)
 
-    def _generate_id(self, packet):
-        return ' '.join((packet.src, "->", packet.dst))
+    def _generate_id(self, *args, **kwargs):
+        tup = self._generate_src_dest(*args, **kwargs)
 
-    def _split_id(self, id):
+        if tup == None:
+            return
+        return ' '.join((tup[0], "->", tup[1]))
+
+    def _generate_src_dest(self, *args, **kwargs):
+        """return (src, dest) or None on error"""
+        raise NotImplementedError()
+
+    def _parse_id(self, id):
         return filter((e.strip() for e in id.split("->")))
+
+class EthernetDB(DirectedDB):
+    """MAC-based database for the ethernet layer"""
+
+    def __init__(self, *args, **kwargs):
+        DirectedDB.__init__(self, *args, **kwargs)
+    
+    def _generate_src_dest(self, packet):
+        if packet:
+            return packet.src, packet.dst
+        return
+
+class IPDB(DirectedDB):
+    """an IP-based database for the IP layer"""
+
+    def __init__(self, *args, **kwargs):
+        DirectedDB.__init__(self, *args, **kwargs)
+
+    def _generate_src_dest(self, packet):
+        if inet.IP in packet:
+            return packet[inet.IP].src, packet[inet.IP].dst
+        return
+
