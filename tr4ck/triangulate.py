@@ -29,5 +29,8 @@ def triangulate_to_kml(*circles):
     return _polygon_to_kml(triangulate(*circles))
 
 if __name__ == "__main__":
-    print >> open("triangulate-test.kml", "w"), _polygon_to_kml(
-        geometry.Polygon((-100, -100), (-100, 100), (100, 100), (100, -100)))
+    kml = _polygon_to_kml(geometry.Polygon((-100, -100), (-100, 100),
+        (100, 100), (100, -100)))
+    print kml
+    print >> open("triangulate-test.kml", "w"), kml
+    print "Written to triangulate-test.kml"

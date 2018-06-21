@@ -1,5 +1,6 @@
 import os
-from scapy.layers import inet
+import scapy.layers
+import socket
 import sys
 
 sys.path.append(os.path.realpath(__file__))
@@ -74,13 +75,26 @@ class EthernetDB(DirectedDB):
         return
 
 class IPDB(DirectedDB):
-    """an IP-based database for the IP layer"""
+    """
+    an IP-based database for the IP layer
+    
+    note that specifying fqdn allows uses DNS requests to determine
+    IP address resolution
+    """
 
-    def __init__(self, *args, **kwargs):
-        DirectedDB.__init__(self, *args, **kwargs)
+    def __init__(self, directory = os.getcwd(), db_mode = "ab",
+            hash = "sha256", store = True, fqdn = False):
+        DirectedDB.__init__(self, directory, db_mode, hash, store)
+
+        self._fqdn = fqdn
 
     def _generate_src_dest(self, packet):
-        if inet.IP in packet:
-            return packet[inet.IP].src, packet[inet.IP].dst
+        if scapy.layers.inet.IP in packet:
+            dest = packet[scapy.layers.inet.IP].dst
+            src = packet[scapy.layers.inet.IP].src
+            
+            if self._fqdn:
+                return socket.getfqdn(src), socket.getfqdn(dest)
+            return src, dest
         return
 
