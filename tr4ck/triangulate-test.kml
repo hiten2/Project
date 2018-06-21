@@ -1,0 +1,14 @@
+<kml xmlns:atom="http://www.w3.org/2005/Atom" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <Folder>
+      <Polygon>
+        <outerBoundaryIs>
+          <linearRing>
+            <Coordinates>0,0,0.1,1,0.</Coordinates>
+          </linearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Folder>
+  </Document>
+</kml>
+

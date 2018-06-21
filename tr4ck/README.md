@@ -1,4 +1,6 @@
 # tr4ck - tracking tools
+## dependencies
+`pykml` - install via `pip install pykml` or `easy_install pykml`
 ## checklist
 - `traffic`
   - database analysis
