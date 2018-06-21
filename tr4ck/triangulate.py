@@ -9,19 +9,25 @@ import geometry
 
 __doc__ = """rudimentary triangulation"""
 
+def _polygon_to_kml(polygon, kmlcolor = "ff0000ff", outline = 0):###problematic
+    """return the KML equivalent for a geometry.Polygon"""
+    coords = [v[:2] + (0, ) for v in polygon.vertices] # lat./long. only
+    kml_coords = ''.join([','.join([str(e) for e in c]) + '.'
+        for c in coords])
+    return lxml.etree.tostring(KML.kml(KML.Document(KML.Placemark(KML.Polygon(
+        KML.outerBoundaryIs(KML.linearRing(KML.Coordinates(kml_coords)))),
+            KML.Style(KML.PolyStyle(KML.color(kmlcolor),
+                KML.outline(outline)))))),
+        pretty_print = True)
+
 def triangulate(*circles):#####contingent upon geometry.Circle.intersect
     """triangulate a polygon based on a set of circles"""
-    return geometry.Polygon((0, 0), (1, 1))
+    pass
 
 def triangulate_to_kml(*circles):
     """return a KML document based on triangulation results"""
-    polygon = triangulate(*circles)
-    kml_coords = [v[:2] + (0, ) for v in polygon.vertices]
-    kml_coords = [','.join([str(e) for e in c]) + '.' for c in kml_coords]
-    kml_coords = ''.join(kml_coords)
-    return lxml.etree.tostring(KML.kml(KML.Document(KML.Folder(KML.Polygon(
-        KML.outerBoundaryIs(KML.linearRing(KML.Coordinates(kml_coords))))))),
-        pretty_print = True)
+    return _polygon_to_kml(triangulate(*circles))
 
 if __name__ == "__main__":
-    print >> open("triangulate-test.kml", "w"), triangulate_to_kml()
+    print >> open("triangulate-test.kml", "w"), _polygon_to_kml(
+        geometry.Polygon((-100, -100), (-100, 100), (100, 100), (100, -100)))
