@@ -8,7 +8,6 @@
   - `geometry`
     - `geometry.Circle.intersect`
       - chord-based (?) algorithm
-    - `geometry.Polygon.__contains__`
-      - ray casting algorithm
+    - ~~`geometry.Polygon.__contains__`~~
   - `triangulate.triangulate`
     - figure out an algorithm

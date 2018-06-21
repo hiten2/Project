@@ -46,7 +46,7 @@ class Point(tuple):
     def slope(self, other):
         """return the 2D slope between the points"""
         assert len(self) == 2 and len(other) == 2, "slope incalculable"
-        xdiff = other[1] - self[1]
+        xdiff = other[0] - self[0]
         ydiff = other[1] - self[1]
         return ydiff / float(xdiff)
 
@@ -62,7 +62,7 @@ class Polygon:
             self.vertices.append(v)
         self.vertices = tuple(self.vertices)
 
-    def __contains__(self, point):#############seems to work, but questionable
+    def __contains__(self, ray):
         """
         ray casting algorithm for the point-in-polygon problem
         
@@ -74,37 +74,45 @@ class Polygon:
         count = 0
         
         for edge in polygon
-            if edge isn't in the direction (X or Y) the ray casts
+            if edge isn't in domain of ray
                 continue
             
-            if edge intersects within valid range
-                count += 1
+            if edge isn't in range of ray
+                continue
+            
+            if edge intersects with ray within valid range
+                if intersection isn't a vertex
+                    count += 1
+                else if intersection wasn't previously crossed
+                    count += 1
+                    mark vertex as crossed
         contains = count > 0 and count isn't divisible by 2
         """
-        nintersects = 0
-        ray_y = point[1]
+        count = 0
+        intersected_vertices = [] # a list of intersected vertices
         
         for i in range(len(self.vertices)):
             a = self.vertices[i]
             b = self.vertices[(i + 1) % len(self.vertices)] # allow wrap-around
             
-            if max(a[0], b[0]) < point[0]: # bad domain
+            if max(a[0], b[0]) < ray[0]: # bad domain
                 continue
             
-            if ray_y < min(a[1], b[1]) or ray_y > max(a[1], b[1]): # bad range
-                continue
+            if ray[1] < min(a[1], b[1]) or ray[1] > max(a[1], b[1]):
+                continue # bad range
             
-            try:
-                m = a.slope(b)
-            except ZeroDivisionError: # vertical line
-                nintersects += 1
-                continue
-            leftmost = sorted((a, b), key = lambda p: p[0])[0]
-            eq_y_at_point = m * (point[0] - a[0]) + a[1]
-
-            if leftmost[1] <= ray_y and eq_y_at_point <= ray_y:
-                nintersects += 1
-        return nintersects and nintersects % 2
+            if a[0] == b[0]: # edge is vertical, so ray intersects
+                count += 1
+            else:
+                intersect = Point((ray[1] - a[1]) / a.slope(b) + a[0], ray[1])
+                
+                if intersect[0] >= ray[0]:
+                    if not intersect in self.vertices:
+                        count += 1
+                    elif not intersect in intersected_vertices:
+                        count += 1
+                        intersected_vertices.append(intersect)
+        return count and count % 2
 
     def normalize(self):
         """
@@ -134,9 +142,3 @@ class Polygon:
 
     def __str__(self):
         return str(self.vertices)
-
-if __name__ == "__main__": # testing
-    p = Point(2, 2)
-    polygon = Polygon(Point(0, 0), Point(0, 1), Point(2, 2), Point(3, 1))
-    print p, "in", polygon, '?'
-    print p in polygon
