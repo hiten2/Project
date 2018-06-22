@@ -12,13 +12,13 @@ doc = """network traffic tracking/analysis"""
 
 def filter_out_localhost(packet):
     """return False for any localhost packet"""
-    if not scapy.layers.inet.IP in packet:
+    if not scapy.layers.inet.IP in packet: # no IP layer
         return True
-    localhosts = ["localhost", "localhost.localdomain", socket.gethostname()]
-    packethosts = [socket.getfqdn(a)
+    hosts = [socket.getfqdn(a)
         for a in (packet[scapy.layers.inet.IP].dst,
         packet[scapy.layers.inet.IP].src)]
-    return len(set(localhosts + packethosts)) == 5
+    localhosts = ["localhost", "localhost.localdomain", socket.gethostname()]
+    return len(set(hosts + localhosts)) == 5 # checks for repeats
 
 class Analyst:
     """
