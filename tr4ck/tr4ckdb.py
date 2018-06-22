@@ -62,6 +62,15 @@ class DirectedDB(Tr4ckDB):
         raise NotImplementedError()
 
     def _parse_id(self, id):
+        assert "->" in id and '@' in id and id.find('@') < id.find("->"), \
+            "invalid ID format"
+        src, dest = id.split("->")
+        dest, timestamp = dest.split('@')
+
+        try:
+            timestamp = float(timestamp)
+        except ValueError:
+            raise ValueError("invalid timestamp")
         return filter((e.strip() for e in id.split("->")))
 
 class EthernetDB(DirectedDB):
