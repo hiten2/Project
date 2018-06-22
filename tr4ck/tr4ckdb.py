@@ -79,7 +79,7 @@ class IPDB(DirectedDB):
     an IP-based database for the IP layer
     
     note that specifying fqdn allows uses DNS requests to determine
-    IP address resolution
+    IP address resolution, and in doing so adds to the network traffic
     """
 
     def __init__(self, directory = os.getcwd(), db_mode = "ab",
