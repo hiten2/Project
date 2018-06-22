@@ -2,6 +2,7 @@ import os
 import scapy.layers
 import socket
 import sys
+import time
 
 sys.path.append(os.path.realpath(__file__))
 
@@ -43,7 +44,7 @@ class Tr4ckDB(db.DB):
 class DirectedDB(Tr4ckDB):
     """
     a directed database,
-    with IDs formatted as "source -> destination"
+    with IDs formatted as "source -> destination @ time"
     """
     
     def __init__(self, *args, **kwargs):
@@ -54,7 +55,7 @@ class DirectedDB(Tr4ckDB):
 
         if tup == None:
             return
-        return ' '.join((tup[0], "->", tup[1]))
+        return ' '.join((tup[0], "->", tup[1], "@", "%.10f" % time.time()))
 
     def _generate_src_dest(self, *args, **kwargs):
         """return (src, dest) or None on error"""

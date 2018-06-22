@@ -7,7 +7,7 @@ import time
 
 __doc__ = """port scanning"""
 
-def _get_router_prefix():
+def _get_router_address():
     """return the router's IPv4 address via "ip route"'s default entry"""
     output = []
     
@@ -148,7 +148,7 @@ def main():
         i += 1
     
     if not ips: # no addresses, so scan the router prefix subdomain
-        ips = _get_router_prefix()
+        ips = _get_router_address()
         ips = ips[:ips.rfind('.')] # strip final number
 
     if not ports:

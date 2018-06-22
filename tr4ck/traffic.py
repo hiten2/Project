@@ -6,19 +6,23 @@ import sys
 
 sys.path.append(os.path.realpath(__file__))
 
+import inet
 import tr4ckdb
 
 doc = """network traffic tracking/analysis"""
 
 def filter_out_localhost(packet):
-    """return False for any localhost packet"""
+    """
+    return False for any localhost packet
+    this does however create a lot of network traffic
+    """
     if not scapy.layers.inet.IP in packet: # no IP layer
         return True
-    hosts = [socket.getfqdn(a)
-        for a in (packet[scapy.layers.inet.IP].dst,
-        packet[scapy.layers.inet.IP].src)]
-    localhosts = ["localhost", "localhost.localdomain", socket.gethostname()]
-    return len(set(hosts + localhosts)) == 5 # checks for repeats
+    hosts = [packet[scapy.layers.inet.IP].dst,
+        packet[scapy.layers.inet.IP].src]
+    localhosts = ["127.0.0.1", "0.0.0.0", "localhost",
+        "localhost.localdomain", socket.gethostname(), inet.get_ip()]
+    return len(set(hosts + localhosts)) == len(localhosts) + 2 # repeats?
 
 class Analyst:
     """
