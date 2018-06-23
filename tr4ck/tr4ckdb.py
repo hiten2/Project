@@ -62,7 +62,7 @@ class DirectedDB(Tr4ckDB):
         raise NotImplementedError()
 
     def _parse_id(self, id):
-        assert "->" in id and '@' in id and id.find('@') < id.find("->"), \
+        assert "->" in id and '@' in id and id.find("->") < id.find('@'), \
             "invalid ID format"
         src, dest = id.split("->")
         dest, timestamp = dest.split('@')
@@ -71,18 +71,7 @@ class DirectedDB(Tr4ckDB):
             timestamp = float(timestamp)
         except ValueError:
             raise ValueError("invalid timestamp")
-        return filter((e.strip() for e in id.split("->")))
-
-class EthernetDB(DirectedDB):
-    """MAC-based database for the ethernet layer"""
-
-    def __init__(self, *args, **kwargs):
-        DirectedDB.__init__(self, *args, **kwargs)
-    
-    def _generate_src_dest(self, packet):
-        if packet:
-            return packet.src, packet.dst
-        return
+        return src, dest, timestamp
 
 class IPDB(DirectedDB):
     """
@@ -108,3 +97,13 @@ class IPDB(DirectedDB):
             return src, dest
         return
 
+class OuterLayerDB(DirectedDB):
+    """MAC-based database for the outermost layer"""
+
+    def __init__(self, *args, **kwargs):
+        DirectedDB.__init__(self, *args, **kwargs)
+    
+    def _generate_src_dest(self, packet):
+        if packet:
+            return packet.src, packet.dst
+        return

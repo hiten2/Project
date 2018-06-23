@@ -53,6 +53,7 @@ def _help():
           "DIRECTORY\n" \
           "\tthe database directory\n" \
           "ACTION\n" \
+          "\tappend NAME [DATA]\tappend data to an entry\n" \
           "\tclean\tclean the database (if it exists)\n" \
           "\tcontains NAME\tdetermine whether an entry exists\n" \
           "\tdelete NAME\tdelete an entry\n" \
@@ -97,6 +98,10 @@ class DB:
         self.directory = directory
         hash = getattr(hashlib, hash)
         self._hash = lambda s: hash(str(s)).hexdigest()
+
+    def append(self, name, data = ''):
+        """append data to an entry (if it exists)"""
+        self.__setitem__(name, data, "ab")
 
     def clean(self):
         """clean "db.csv" of redundant/non-existent entries"""
@@ -216,7 +221,7 @@ class DB:
         if exception:
             raise exception
         return data
-
+    
     def list(self):
         """return an unsorted list of all the entries (names only)"""
         self.__enter__()
@@ -270,7 +275,7 @@ class DB:
         if exception:
             raise exception
     
-    def __setitem__(self, name, data):
+    def __setitem__(self, name, data, mode = "wb"):
         """
         store a name mapped to data
         
@@ -279,7 +284,7 @@ class DB:
         """
         self.__enter__()
         exception = None
-        fp = open(self._generate_path(name), "wb")
+        fp = open(self._generate_path(name), mode)
         locked = True
 
         try:
@@ -327,14 +332,14 @@ if __name__ == "__main__":
     directory, action = sys.argv[1:3]
     action = action.lower()
     
-    if action in ("contains", "delete", "get", "set"):
+    if action in ("append", "contains", "delete", "get", "set"):
         if len(sys.argv) < 4:
             print "Missing entry name."
             _help()
             sys.exit()
         name = sys.argv[3]
         
-        if action == "set" and len(sys.argv) > 4:
+        if action in ("append", "set") and len(sys.argv) > 4:
             data = sys.argv[4]
     elif not action in ("clean", "init", "list"):
         print "Invalid action."
@@ -342,7 +347,9 @@ if __name__ == "__main__":
         sys.exit()
     db = DB(directory)
     
-    if action == "clean":
+    if action == "append":
+        db.append(name, data)
+    elif action == "clean":
         db.clean()
     elif action == "contains":
         print name in db

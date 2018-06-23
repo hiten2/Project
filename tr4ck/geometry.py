@@ -1,6 +1,6 @@
 import math
 
-__doc__ = """Euclidean geometry"""
+__doc__ = """selective Euclidean geometry"""
 
 class Circle:
     """circle representation"""
@@ -95,6 +95,18 @@ class Polygon:
                     count += 1
                     mark vertex as crossed
         contains = count > 0 and count isn't divisible by 2
+
+        e.g. the upper ray (inside) intersects an odd number of times,
+        whereas the lower ray (outside) intersects an even number of times
+        
+        +--------+   +-+
+         \       |  /  |
+          \  o===X=X===X===>
+           +     |/     \
+        o=X======X===X===X===>
+         +          / \ /
+          \        /   +
+           +------+
         """
         count = 0
         intersected_vertices = [] # a list of intersected vertices
@@ -127,7 +139,7 @@ class Polygon:
 
     def normalize(self):
         """
-        remove overlapping 2D line segments by rearranging order
+        remove overlapping 2D edges by rearranging order
         of vertices as such:
         1. split into two halves by Y-value
         2. sort upper half by X-values, from least to greatest
@@ -138,6 +150,13 @@ class Polygon:
 
         e.g. Polygon((0, 0), (1, 1), (0, 1), (1, 0))
             -> Polygon((0, 1), (1, 1), (1, 0), (0, 0))
+
+        +----+           +----+
+         \  /            |    |
+          \/             |    |
+          /\     --->    |    |
+         /  \            |    |
+        +----+           +----+
         """
         high = []
         low = []
@@ -155,4 +174,4 @@ class Polygon:
         self.vertices = tuple(high + low)
 
     def __str__(self):
-        return "Polygon" + str(tuple(self.vertices))
+        return str(tuple(self.vertices))
