@@ -20,7 +20,7 @@ if __name__ == "__main__":
     # this will print IP layer addresses as "source -> destination"
     # but omit ones CLAIMING to be this computer
     db = tr4ckdb.dummy(tr4ckdb.IPDB)
-    traffic.PacketTracker(db).track()#, traffic.filter_out_localhost).track()
+    traffic.PacketTracker(db, traffic.filter_out_localhost).track()
     
     # test triangulation over a set of circles
     circles = [geometry.Circle(geometry.Point(0, 0), 1),

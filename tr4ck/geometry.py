@@ -4,7 +4,7 @@ __doc__ = """selective Euclidean geometry"""
 
 class Circle:
     """circle representation"""
-
+    
     def __init__(self, center = None, radius = 1):
         if not center:
             center = Point(0, 0)
