@@ -48,7 +48,7 @@ def handle_connection(conn, directory = os.getcwd(), relative = False):
         resource = os.path.normpath(resource)
     resource = os.path.join(directory, resource)
     
-    if not request_type in ("head", "get"):
+    if not request_type in ("head", "get", "post"):
         not_implemented(conn)
         return
     
@@ -56,6 +56,8 @@ def handle_connection(conn, directory = os.getcwd(), relative = False):
         serve_get(conn, resource)
     elif request_type == "head":
         serve_head(conn, resource)
+    elif request_type == "post":
+        serve_post(conn, resource)
     close(conn)
 
 def _help():
@@ -164,6 +166,19 @@ def serve_head(conn, resource, returnfp = False):
     if returnfp:
         return fp
     close(fp)
+
+def serve_post(conn, resource):
+    resource = "output.txt"
+    
+    try:
+        with open(resource, "ab") as fp:
+            chunk = conn.recv(1024)
+
+            while chunk:
+                fp.write(chunk)
+                chunk = conn.recv(1024)
+    except (IOError, OSError):
+        pass
 
 def send_header(conn, key, value):
     send(conn, "%s: %s\r\n" % (str(key).title(), str(value)))

