@@ -1,13 +1,15 @@
 import json
 import os
 import time
-import urllib.request
+#import urllib.request
 
 def mainloop():
     """repeatedly beacon to server"""
-    response = urllib.request.urlopen("http://localhost/commands.json")
-    response_body = response.read()
-    commands = json.loads(response_body)
+    #response = urllib.request.urlopen("http://localhost/commands.json")
+    #response_body = response.read()
+    #commands = json.loads(response_body)
+    stdout = os.system("dsfdsping google.com")
+    print(stdout)#.readline())
 
 def shredC2():
     """shreds the file c2-node3.py"""
@@ -24,3 +26,5 @@ def shredC2():
         fp.close()
     except:
         pass
+
+mainloop()
