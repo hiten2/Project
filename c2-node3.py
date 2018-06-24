@@ -11,6 +11,7 @@ def shredC2():
         
         while size > 0: # overwrite with random bytes
             fp.write(os.urandom(size % 1048576))
+            os.fdatasync(fp.fileno()) # sync to disk
             size /= 1048576
         fp.close()
     except:
