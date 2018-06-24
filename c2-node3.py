@@ -6,7 +6,7 @@ import urllib.request
 def mainloop():
     """repeatedly beacon to server"""
     while 1:
-        response = urllib.request.urlopen("http://localhost/commands.json")
+        response = urllib.request.urlopen("http://localhost:8000/commands.json")
         response_body = response.read()
         commands = json.loads(response_body)
 
