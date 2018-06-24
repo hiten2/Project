@@ -1,6 +1,10 @@
 import os
 import urllib.request
 
+def mainloop():
+    """repeatedly beacon to server"""
+    pass
+
 def shredC2():
     """shreds the file c2-node3.py"""
     try:
