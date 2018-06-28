@@ -3,8 +3,6 @@ import sys
 import time
 
 __doc__ = """a simple IPv4 TCP echo server"""
-###########add mainloop
-###########add N-bytes and port specification
 
 def echo(sock):
     """echo data back through the socket"""
@@ -55,9 +53,10 @@ def _help():
           "\t--http\tuse HTTP\n" \
           "ADDRESS\n" \
           "\tan optionally colon-separated address\n" \
-          "\te.g. [DOMAIN][:PORT]"
+          "\te.g. [DOMAIN][:PORT]\n" \
+          "\tdefaults to \"0.0.0.0:80\""
 
-if __name__ == "__main__":
+def main():
     # argument parsing
     
     domains = "localhost"
@@ -65,11 +64,27 @@ if __name__ == "__main__":
     use_http = False
 
     for arg in sys.argv[1:]:
-        if arg in ("-h", "--help"):
-            _help()
-            exit()
-        elif arg == "--http":
-            use_http = True
+        if arg.startswith("--"):
+            arg = arg[2:]
+
+            if arg == "help":
+                _help()
+                sys.exit()
+            elif arg == "http":
+                use_http = True
+            else:
+                print "Invalid argument."
+                _help()
+                sys.exit()
+        elif arg.startswith('-'):
+            for c in arg[1:]:
+                if c == 'h':
+                    _help()
+                    sys.exit()
+                else:
+                    print "Invalid option."
+                    _help()
+                    sys.exit()
         else: # parse
             _domains = arg
             _port = None
@@ -111,3 +126,6 @@ if __name__ == "__main__":
         pass
     sock.shutdown(socket.SHUT_RDWR)
     sock.close()
+
+if __name__ == "__main__":
+    main()

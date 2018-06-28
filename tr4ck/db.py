@@ -1,42 +1,18 @@
-# Bailey Defino 2018
+# Copyright (C) 2018 Bailey Defino
 # <http://hiten2.asuscomm.com>
 
-# CLARIFICATIONS:
-#   1. "Authorship Information" regards the following:
-#      "Bailey Defino," the year, and "<http://hiten2.asuscomm.com>."
-#   2. "Illegal Activity" refers to any activity that falls outside
-#       of the laws applicable to the end user.
-#   3. "Negative Consequences" are defined by the original author;
-#       they include, but are not limited to: illegal activity
-#       and property damage.
-#   4. "Original Author" refers to the author behind the "Bailey Defino"
-#       alias.
-#   5. "This License" and "License" refer to the following as they appear
-#       on a verbatim copy of this code: authorship information
-#       and complete sections entitled: "CLARIFICATIONS," "DISCLAIMER,"
-#       "DISTRIBUTION CONDITIONS," and "LICENSE."
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 
-# DISCLAIMER:
-#   THIS CODE IS PROVIDED WITH NO WARRANTY NOR ANY GAURANTEES.
-#  THE ORIGINAL AUTHOR IS NOT RESPONSIBLE FOR ANY NEGATIVE CONSEQUENCES
-#   RESULTING FROM ANY ACTION PERFORMED ON OR WITH THE FOLLOWING CODE,
-#   REGARDLESS OF WHETHER IT IS A VERBATIM COPY.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 
-# DISTRIBUTION CONDITIONS:
-#   (1) The distributed code contains this license,
-#   (2) AND either "a" OR "b":
-#     (a) the distributed code is a verbatim copy,
-#     (b) OR the distributed code asserts that the original author was NOT
-#         responsible for any modifications in the distributed code.
-#   (3) the distributed code comes without a charge: monetary or otherwise.
-
-# LICENSE:
-#   This verbatim code is intellectual property, but is also free
-#   and open source software.  This code, verbatim or modified, may only
-#   be distributed if ALL of the distribution conditions are met.
-#   If not distributed, this code may be modified in any way;
-#   however, modification of this code and/or license,
-#   does NOT void this original license.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 __doc__ = """a string-based database"""
 

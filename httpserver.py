@@ -116,6 +116,12 @@ def send(conn, data):
     except socket.error:
         pass
 
+def send_header(conn, key, value):
+    send(conn, "%s: %s\r\n" % (str(key).title(), str(value)))
+
+def send_status_line(conn, code, status):
+    send(conn, "HTTP/1.0 %u %s\r\n" % (int(code), str(status).upper()))
+
 def serve_get(conn, resource):
     fp = serve_head(conn, resource, True)
 
@@ -165,18 +171,12 @@ def serve_head(conn, resource, returnfp = False):
         return fp
     close(fp)
 
-def send_header(conn, key, value):
-    send(conn, "%s: %s\r\n" % (str(key).title(), str(value)))
-
-def send_status_line(conn, code, status):
-    send(conn, "HTTP/1.0 %u %s\r\n" % (int(code), str(status).upper()))
-
 def sizeof(fp):
     start = fp.tell()
     fp.seek(0, os.SEEK_END)
-    _size = fp.tell()
+    size = fp.tell()
     fp.seek(start, os.SEEK_SET)
-    return _size
+    return size
 
 def terminate_header(conn):
     send(conn, "\r\n")

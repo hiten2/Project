@@ -117,6 +117,11 @@ def send(conn, data):
         conn.sendall(data.encode())
     except socket.error:
         pass
+def send_header(conn, key, value):
+    send(conn, "%s: %s\r\n" % (str(key).title(), str(value)))
+
+def send_status_line(conn, code, status):
+    send(conn, "HTTP/1.0 %u %s\r\n" % (int(code), str(status).upper()))
 
 def serve_get(conn, resource):
     fp = serve_head(conn, resource, True)
@@ -132,6 +137,7 @@ def serve_get(conn, resource):
             chunk = fp.read(4096)
         except (IOError, OSError):
             pass
+    print("sent")
     close(fp)
 
 def serve_head(conn, resource, returnfp = False):
@@ -168,8 +174,9 @@ def serve_head(conn, resource, returnfp = False):
     close(fp)
 
 def serve_post(conn, resource):
-    resource = "output.txt"
-    
+    not_implemented(conn)
+    terminate_header(conn)
+    return
     try:
         with open(resource, "ab") as fp:
             chunk = conn.recv(1024)
@@ -180,18 +187,12 @@ def serve_post(conn, resource):
     except (IOError, OSError):
         pass
 
-def send_header(conn, key, value):
-    send(conn, "%s: %s\r\n" % (str(key).title(), str(value)))
-
-def send_status_line(conn, code, status):
-    send(conn, "HTTP/1.0 %u %s\r\n" % (int(code), str(status).upper()))
-
 def sizeof(fp):
     start = fp.tell()
     fp.seek(0, os.SEEK_END)
-    _size = fp.tell()
+    size = fp.tell()
     fp.seek(start, os.SEEK_SET)
-    return _size
+    return size
 
 def terminate_header(conn):
     send(conn, "\r\n")
