@@ -71,22 +71,60 @@ def main():
             if arg == "help":
                 _help()
                 sys.exit()
-            elif arg.startswith("nbytes="):
-                try:
-                    scankwargs["nbytes"] = int(arg.split('=', 1)[1])
-                except ValueError:
-                    pass
-            elif arg.startswith("ports="):
-                ports += _split_port_csv(arg.split('=', 1)[1])
-            elif arg.startswith("prompt="):
-                scankwargs["prompt"] = arg.split('=', 1)[1]
+            elif arg.startswith("nbytes"):
+                if '=' in arg:
+                    try:
+                        scankwargs["nbytes"] = int(arg.split('=', 1)[1])
+                    except ValueError:
+                        pass
+                else:
+                    if i == len(sys.argv) - 1:
+                        print "Argument required."
+                        _help()
+                        sys.exit()
+
+                    try:
+                        scankwargs["nbytes"] = int(sys.argv[i + 1])
+                    except ValueError:
+                        pass
+                    i += 1
+            elif arg.startswith("ports"):
+                if '=' in arg:
+                    ports += _split_port_csv(arg.split('=', 1)[1])
+                else:
+                    if i == len(sys.argv) - 1:
+                        print "Argument required."
+                        _help()
+                        sys.exit()
+                    ports += _split_port_csv(sys.argv[i + 1])
+                    i += 1
+            elif arg.startswith("prompt"):
+                if '=' in arg:
+                    scankwargs["prompt"] = arg.split('=', 1)[1]
+                else:
+                    if i == len(sys.argv) - 1:
+                        print "Argument required."
+                        _help()
+                        sys.exit()
+                    scankwargs["prompt"] = sys.argv[i + 1]
+                    i += 1
             elif arg == "sort":
                 sort = True
-            elif arg.startswith("timeout="):
-                try:
-                    timeout = float(arg.split('=', 1)[1])
-                except ValueError:
-                    pass
+            elif arg.startswith("timeout"):
+                if '=' in arg:
+                    try:
+                        timeout = float(arg.split('=', 1)[1])
+                    except ValueError:
+                        pass
+                else:
+                    if i == len(sys.argv) - 1:
+                        print "Argument required."
+                        _help()
+                        sys.exit()
+                    try:
+                        timeout = float(sys.argv[i + 1])
+                    except ValueError:
+                        pass
             elif arg == "tcpconnect":
                 names = ("connect", "tcp")
             elif arg == "tcpresponse":
@@ -439,21 +477,24 @@ class SubdomainScanner(ThreadedScanner):
         for subdomain in self.subdomains:
             generate = True
 
-            if isinstance(subdomain, int) or isinstance(subdomain, long):
-                base256 = []
+            if subdomain:
+                if isinstance(subdomain, int) or isinstance(subdomain, long):
+                    base256 = []
+                    
+                    for i in range(4): # subdomain -> IPv4
+                        base256.insert(0, subdomain % 256)
+                        subdomain /= 256
+                    subdomain = '.'.join((str(e) for e in base256))
+                subdomain = subdomain.split('.')
                 
-                for i in range(4): # subdomain -> IPv4
-                    base256.insert(0, subdomain % 256)
-                    subdomain /= 256
-                subdomain = '.'.join((str(e) for e in base256))
-            subdomain = subdomain.split('.')
-            
-            for e in subdomain:
-                try:
-                    int(e)
-                except ValueError:
-                    generate = False
-                    break
+                for e in subdomain:
+                    try:
+                        int(e)
+                    except ValueError:
+                        generate = False
+                        break
+            else:
+                subdomain = [subdomain]
             
             if generate: # iterate through numeric subdomains
                 max_n = 256 ** (4 - len(subdomain))
