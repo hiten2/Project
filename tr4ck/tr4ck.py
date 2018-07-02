@@ -17,10 +17,11 @@ if __name__ == "__main__":
     # create a dummy database
     # and try collecting some packets into it
 
-    # this will print IP layer addresses as "source -> destination"
+    # this will print IP layer addresses as (source, destination, timestamp)
     # but omit ones CLAIMING to be this computer
-    db = tr4ckdb.dummy(tr4ckdb.IPDB)
-    traffic.PacketTracker(db, traffic.filter_out_localhost).track()
+
+    with tr4ckdb.dummy(tr4ckdb.IPDB) as db:
+        traffic.PacketTracker(db, traffic.filter_out_localhost).track()
     
     # test triangulation over a set of circles
     circles = [geometry.Circle(geometry.Point(0, 0), 1),

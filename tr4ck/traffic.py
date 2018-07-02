@@ -54,8 +54,8 @@ class Tracker:
             
             if not id == None:
                 if self.db._store:
-                    print id, "stored to",
-                    self.db._generate_path(id, self.db.store(data))
+                    self.db.append(id, str(data))
+                    print id, "stored to", self.db._generate_path(id)
                 else:
                     print id
     
