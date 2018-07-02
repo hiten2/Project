@@ -21,7 +21,7 @@ sys.path.append(os.path.realpath(__file__))
 
 import conf
 
-__doc__ = """RFC 3912-compliant WHOIS client implementation"""
+__doc__ = """RFC 3912-compliant WHOIS implementation"""
 
 global SERVERS
 SERVERS = ["whois.iana.org"]
@@ -51,20 +51,30 @@ def whois(domain, server = SERVERS[0], timeout = None):
         sock.close()
     except socket.error:
         pass
-    empty_line = "\n\n"
+    return Response(data)
 
-    if "\r\n\r\n" in data:
-        empty_line = "\r\n\r\n"
-    
-    for category in data.split(empty_line):
-        response.append(conf.Conf(autosync = False,
-            flavor = conf.ConfFlavor(comment = '%')))
+class Response(list):
+    """a basic WHOIS response"""
+
+    def __init__(self, response = ''):
+        list.__init__(self)
         
-        try:
-            response[-1].load(category)
+        self.empty_line = "\n\n"
 
-            if not response[-1]: # omit empty categories
-                raise ValueError()
-        except ValueError:
-            del response[-1]
-    return response
+        if "\r\n\r\n" in response:
+            self.empty_line = "\r\n\r\n"
+        
+        for category in response.split(self.empty_line):
+            self.append(conf.Conf(autosync = False,
+                flavor = conf.ConfFlavor(comment = '%')))
+            
+            try:
+                self[-1].load(category)
+
+                if not self[-1]: # omit empty categories
+                    raise ValueError()
+            except ValueError:
+                del self[-1]
+
+    def __str__(self):
+        return self.empty_line.join((str(e) for e in self))

@@ -341,7 +341,7 @@ class UDPResponseScan(Scan):
         self.prompt = prompt
 
     def scan(self):
-        output = ((self.ip, self.port), False, (None, None))
+        output = ((self.ip, self.port), False, None)
         sock = None
         
         try:

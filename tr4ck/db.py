@@ -13,13 +13,14 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-__doc__ = """a string-based database"""
-
+import csv
 import fcntl
 import hashlib
 import os
+import StringIO
 import sys
+
+__doc__ = """a string-based database"""
 
 def _help():
     print "a string-based database\n" \
@@ -34,11 +35,11 @@ def _help():
           "\tcontains NAME\tdetermine whether an entry exists\n" \
           "\tdelete NAME\tdelete an entry\n" \
           "\tget NAME\tget an entry\n" \
-          "\tinit\tinitialize the database with \"db.csv\" (default)\n" \
+          "\tinit\tinitialize the database (happens with all actions)\n" \
           "\tlist\tlist all entries as unicode-escaped strings\n" \
           "\tset NAME [DATA]\tset an entry\n" \
           "NAME\n" \
-          "\tan entry name (a string)\n" \
+          "\tan entry name (a CSV string)\n" \
           "DATA\n" \
           "\tentry data (a string)"
 
@@ -48,11 +49,10 @@ class DB:
     
     the database is made up of two main components:
     1. the database file
-        a (CR)LF-separated list of unicode-escaped entry names
-        which MAY or MAY NOT exist
+        a ragged CSV document where each row is a list of name components
     2. entries
         the corresponding raw data for an entry name,
-        stored at "directory/hashed-entry-name"
+        stored at "directory/subtree of hashed name components/entry.dat"
 
     the database model is dict-like, but is intended for extensibility
     through its simplicity
@@ -67,11 +67,13 @@ class DB:
     7. raise any exceptions
     8. return any data
     """
-
+    
     def __init__(self, directory = os.getcwd(), hash = "sha256"):
         self._db_fp = None
         self._db_path = os.path.join(directory, "db.csv")
-        self.directory = directory
+        self._db_reader = None
+        self._db_writer = None
+        self.directory = os.path.realpath(directory)
         hash = getattr(hashlib, hash)
         self._hash = lambda s: hash(str(s)).hexdigest()
 
@@ -80,7 +82,7 @@ class DB:
         self.__setitem__(name, data, "ab")
 
     def clean(self):
-        """clean "db.csv" of redundant/non-existent entries"""
+        """remove redundant/nonexistent entries from the database file"""
         self.__enter__()
         exception = None
         locked = True
@@ -120,7 +122,8 @@ class DB:
         """delete an entry"""
         exception = None
         locked = True
-        fp = open(self._generate_path(name), "rb") # we need a lock
+        path = self._generate_path(name)
+        fp = open(path, "rb") # we need a lock
         
         try:
             fcntl.flock(fp.fileno(), fcntl.LOCK_EX)
@@ -128,7 +131,12 @@ class DB:
             locked = False
         
         try:
-            os.unlink(self._generate_path(name))
+            os.unlink(path)
+
+            while not path in ('', os.sep, self.directory) \
+                    and not os.listdir(path):
+                os.rmdir(path)
+                path = os.path.dirname(path)
             self.clean()
         except Exception as exception:
             pass
@@ -153,6 +161,8 @@ class DB:
         
         if not isinstance(self._db_fp, file) or self._db_fp.closed:
             self._db_fp = open(self._db_path, "a+b")
+            self._db_reader = csv.reader(self._db_fp)
+            self._db_writer = csv.writer(self._db_fp)
         return self
 
     def __exit__(self, *exception):
@@ -164,7 +174,10 @@ class DB:
 
     def _generate_path(self, name):
         """return the hashed equivalent of a name"""
-        return os.path.join(self.directory, self._hash(name))
+        if not isinstance(name, list) and not isinstance(name, tuple):
+            name = [name]
+        return os.path.join(os.path.realpath(self.directory),
+            *([self._hash(str(n)) for n in name] + ["entry.dat"]))
 
     def __getitem__(self, name):
         """retrieve an entry"""
@@ -208,20 +221,15 @@ class DB:
             fcntl.flock(self._db_fp.fileno(), fcntl.LOCK_EX)
         except IOError:
             locked = False
-        names = set()
+        
+        names = []
 
         try:
             self._db_fp.seek(0, os.SEEK_SET)
             
-            for l in self._db_fp.readlines():
-                if l.endswith("\r\n"):
-                    l = l[:-2]
-                elif l.endswith('\n'):
-                    l = l[:-1]
-                l = l.decode("unicode-escape")
-                
+            for l in self._db_reader:
                 if l in self:
-                    names.add(l)
+                    names.append(l)
         except Exception as exception:
             pass
         
@@ -236,13 +244,15 @@ class DB:
         return sorted(names)
     
     def _register(self, name):
-        """register a name with the database"""
+        """register a name with the database (unlocked)"""
         self.__enter__()
         exception = None
+
+        if not isinstance(name, list) and not isinstance(name, tuple):
+            name = [name]
         
         try:
-            self._db_fp.write(name.encode("unicode-escape"))
-            self._db_fp.write("\r\n")
+            self._db_writer.writerow(name)
             self._db_fp.flush()
             os.fdatasync(self._db_fp.fileno())
         except Exception as exception:
@@ -260,13 +270,23 @@ class DB:
         """
         self.__enter__()
         exception = None
-        fp = open(self._generate_path(name), mode)
+        path = self._generate_path(name)
+
+        if not os.path.exists(os.path.dirname(path)):
+            os.makedirs(os.path.dirname(path))
+        fp = open(path, mode)
         locked = True
+        locked_fp = True
+
+        try:
+            fcntl.flock(self._db_fp.fileno(), fcntl.LOCK_EX)
+        except IOError:
+            locked = False
 
         try:
             fcntl.flock(fp.fileno(), fcntl.LOCK_EX)
         except IOError:
-            locked = False
+            locked_fp = False
 
         try:
             fp.write(data)
@@ -275,10 +295,16 @@ class DB:
             self._register(name)
         except Exception as exception:
             pass
+
+        if locked_fp:
+            try:
+                fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
+            except IOError:
+                pass
         
         if locked:
             try:
-                fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
+                fcntl.flock(self._db_fp.fileno(), fcntl.LOCK_UN)
             except IOError:
                 pass
         
@@ -313,7 +339,7 @@ if __name__ == "__main__":
             print "Missing entry name."
             _help()
             sys.exit()
-        name = sys.argv[3]
+        name = list(csv.reader(StringIO.StringIO(sys.argv[3])))[0]
         
         if action in ("append", "set") and len(sys.argv) > 4:
             data = sys.argv[4]
@@ -322,6 +348,7 @@ if __name__ == "__main__":
         _help()
         sys.exit()
     db = DB(directory)
+    db.__enter__()
     
     if action == "append":
         db.append(name, data)
@@ -336,8 +363,11 @@ if __name__ == "__main__":
         sys.stdout.flush()
     elif action == "list":
         for n in db.list():
-            print n.encode("unicode-escape")
+            if not isinstance(n, list) and not isinstance(n, tuple):
+                n = [n]
+            csv.writer(sys.stdout).writerow(n)
+            sys.stdout.flush()
     elif action == "set":
         db[name] = data
-    # otherwise, action == "init"
+    # otherwise action == "init"
     db.__exit__()
