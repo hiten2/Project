@@ -21,10 +21,10 @@ if __name__ == "__main__":
     # but omit ones CLAIMING to be this computer
 
     with tr4ckdb.dummy(tr4ckdb.IPDB) as db:
-        traffic.PacketTracker(db, traffic.filter_out_localhost).track()
+        traffic.PacketTracker(db).track()#, traffic.filter_out_localhost).track()
     
     # test triangulation over a set of circles
     circles = [geometry.Circle(geometry.Point(0, 0), 1),
         geometry.Circle(geometry.Point(0.5, 0.5), 1),
         geometry.Circle(geometry.Point(0.5, 0), 1)]
-    #triangulate.Triangulator.triangulate()
+    #triangulate.Triangulator.triangulate(circles)

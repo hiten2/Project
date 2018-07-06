@@ -200,8 +200,11 @@ def main():
             output = sorted(list(output), key = lambda t: t[0])
         except KeyboardInterrupt:
             sys.exit()
-    header = "Success\tAddress" # print a header
+    header = "Address" # print a header
     
+    if not yes_only:
+        header = "Success\t" + header
+
     if "response" in names:
         header += "\tResponse"
     print header
@@ -216,10 +219,14 @@ def main():
                 print "Yes\t%s:%u\t%s" % (address[0], address[1], data)
             elif not yes_only:
                 print "no\t%s:%u\t%s" % (address[0], address[1], data)
-        elif success:
-            print "Yes\t%s:%u" % address
-        elif not yes_only:
-            print "no\t%s:%u" % address
+        elif yes_only:
+            if success:
+                print "%s:%u" % address
+        else:
+            if success:
+                print "Yes\t%s:%u" % address
+            else:
+                print "no\t%s:%u" % address
 
 def _scanclassbynames(names):
     """

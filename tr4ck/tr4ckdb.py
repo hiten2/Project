@@ -74,7 +74,7 @@ class IPDB(DirectedDB):
     """
     an IP-based database for the IP layer
     
-    note that specifying fqdn allows uses DNS requests to determine
+    note that specifying fqdn uses DNS requests to determine
     IP address resolution, and in doing so adds to the network traffic
     """
 
