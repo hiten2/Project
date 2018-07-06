@@ -33,7 +33,7 @@ def _help():
           "Usage: python portscanner.py [OPTIONS] [ADDRESSES]\n" \
           "OPTIONS\n" \
           "\t-h, --help\tdisplay this text and exit\n" \
-          "\t-n, --nbytes=INT\tthe number of bytes to recieve\n" \
+          "\t-n, --nbytes=INT\tthe number of bytes to receive\n" \
           "\t\tif a response scan\n" \
           "\t-p, --ports=CSV\tan unquoted, comma-separated list of ports\n" \
           "\t\tand/or hyphen-separated ranges of ports\n" \
@@ -212,7 +212,11 @@ def main():
     for address, success, data in output:
         if not data:
             data = ''
-        data = data.encode("unicode-escape")
+
+        try:
+            data = data.encode("unicode-escape")
+        except ValueError:
+            pass
         
         if "response" in names:
             if success:
