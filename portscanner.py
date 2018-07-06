@@ -218,17 +218,18 @@ def main():
         except ValueError:
             pass
         
-        if "response" in names:
+        if yes_only:
             if success:
-                print "Yes\t%s:%u\t%s" % (address[0], address[1], data)
-            elif not yes_only:
-                print "no\t%s:%u\t%s" % (address[0], address[1], data)
-        elif yes_only:
-            if success:
-                print "%s:%u" % address
+                if "response" in names:
+                    print "%s:%u\t%s" % (address, response)
+                else:
+                    print "%s:%u" % address
         else:
             if success:
-                print "Yes\t%s:%u" % address
+                if "response" in names:
+                    print "Yes\t%s:%u\t%s" % (address, response)
+                else:
+                    print "Yes\t%s:%u" % address
             else:
                 print "no\t%s:%u" % address
 
