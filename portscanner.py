@@ -221,13 +221,13 @@ def main():
         if yes_only:
             if success:
                 if "response" in names:
-                    print "%s:%u\t%s" % (address, response)
+                    print "%s:%u\t%s" % (address, data)
                 else:
                     print "%s:%u" % address
         else:
             if success:
                 if "response" in names:
-                    print "Yes\t%s:%u\t%s" % (address, response)
+                    print "Yes\t%s:%u\t%s" % (address, data)
                 else:
                     print "Yes\t%s:%u" % address
             else:
