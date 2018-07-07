@@ -67,11 +67,10 @@ class Transaction:
     def prove_capacity(self, hash, max_hash):
         """increment the nonce until hash(data + nonce) <= max_hash"""
         data = _str_as_int(self.data)
-        hashed = hash(_int_as_str(data + self.nonce))
 
-        while hashed > max_hash:
+        while hash(_int_as_str(data)) > max_hash:
+            data += 1 # slight efficiency boost
             self.nonce += 1
-            hashed = hash(_int_as_str(data + self.nonce))
 
     def store(self, path):
         """store the transaction to a path"""
