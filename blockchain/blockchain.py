@@ -15,11 +15,17 @@ def _str_as_int(s):
     return int(s.encode("hex"), 16)
 
 class Blockchain:
-    """a dict-like blockchain"""
-    
-    def __init__(self, directory = os.getcwd(), max_hash = 32 * 'f'):
+    def __init__(self, directory = os.getcwd(),
+            hash = lambda s: hashlib.sha256(s).hexdigest(),
+            max_hash = 32 * 'f'):
         self.directory = directory
+        self.hash = hash
         self.max_hash = max_hash
+
+    def add(self, trans):
+        self.__enter__()
+        trans.prove_capacity(self.hash, self.max_hash)
+        trans.store(self._generate_path(trans))
 
     def __enter__(self):
         if not os.path.exists(self.directory):
@@ -29,7 +35,13 @@ class Blockchain:
     def __exit__(self):
         pass
 
-    def 
+    def _generate_path(self, trans):
+        return os.path.join(self.directory, str(trans.timestamp))
+
+    def get(self, timestamp):
+        trans = Transaction()
+        trans.load(str(timestamp))
+        return trans
 
 class Transaction:
     """
