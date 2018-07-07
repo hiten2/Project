@@ -15,32 +15,64 @@ def _str_as_int(s):
     return int(s.encode("hex"), 16)
 
 class Blockchain:
-    def __init__(self, directory = os.getcwd(), min_hash = 0):#########
+    """a dict-like blockchain"""
+    
+    def __init__(self, directory = os.getcwd(), max_hash = 32 * 'f'):
         self.directory = directory
+        self.max_hash = max_hash
+
+    def __enter__(self):
+        if not os.path.exists(self.directory):
+            os.makedirs(self.directory)
+        return self
+
+    def __exit__(self):
+        pass
+
+    def 
 
 class Transaction:
-    def __init__(self, data, nonce = 0, timestamp = None):
-        self.data = _str_as_int(data)
+    """
+    a transaction stored as:
+        nonce + CRLF + timestamp + CRLF + data
+    """
+    
+    def __init__(self, data = '', nonce = 0, timestamp = None):
+        self.data = data
         self.nonce = 0
 
         if not timestamp:
             timestamp = time.time()
         self.timestamp = timestamp
 
-    def prove_capacity(self, hash, min_hash):
-        """increment the nonce until hash(data + nonce) < min_hash"""
-        hashed = hash(_int_as_str(self.data + self.nonce))
+    def load(self, path):
+        """load a transaction into the current instance"""
+        with open(path, "rb") as fp:
+            self.nonce = int(fp.readline().strip())
+            self.timestamp = float(fp.readline().strip())
+            self.data = fp.read()
 
-        while hashed > min_hash:
+    def prove_capacity(self, hash, max_hash):
+        """increment the nonce until hash(data + nonce) <= max_hash"""
+        data = _str_as_int(self.data)
+        hashed = hash(_int_as_str(data + self.nonce))
+
+        while hashed > max_hash:
             self.nonce += 1
-            hashed = hash(_int_as_str(self.data + self.nonce))
+            hashed = hash(_int_as_str(data + self.nonce))
+
+    def store(self, path):
+        """store the transaction to a path"""
+        with open(path, "wb") as fp:
+            fp.write("%u\r\n%f\r\n" % (self.nonce, self.timestamp))
+            fp.write(self.data)
 
 if __name__ == "__main__":
     import hashlib
     t = Transaction('\0')
     hash = lambda s: hashlib.sha256(s).hexdigest()
-    offset = 6
-    min_hash = '0' * offset + 'f' * (64 - offset)
-    print min_hash
-    t.prove_capacity(hash, min_hash)
+    offset = 2
+    max_hash = offset* '0' + (64 - offset) * 'f'
+    print max_hash
+    t.prove_capacity(hash, max_hash)
     print t.nonce
