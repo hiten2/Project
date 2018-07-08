@@ -1,10 +1,15 @@
+import BaseHTTPServer
 import hashlib
 import os
+import SimpleHTTPServer
 import sys
 import time
 import urllib2
 
 __doc__ = """a basic proof-of-work blockchain"""
+
+global BLOCKCHAIN_SINGLETON
+BLOCKCHAIN_SINGLETON = None
 
 def _int_as_str(i):
     h = hex(i)[2:]
@@ -26,6 +31,9 @@ class Blockchain:
     def __init__(self, directory = os.getcwd(), urls = (),
             hash = lambda s: hashlib.sha256(s).hexdigest(),
             max_hash = 64 * 'f'):
+        global BLOCKCHAIN_SINGLETON
+        BLOCKCHAIN_SINGLETON = self
+        
         if not os.path.exists(directory):
             os.makedirs(directory)
         self.directory = directory
@@ -47,9 +55,18 @@ class Blockchain:
         trans.load(str(timestamp))
         return trans
 
-    def serve_forever(self):##########
+    def serve_forever(self, address = ('', 8000)):############
         """start an HTTP server which logs and verifies transactions"""
-        pass
+        server = BaseHTTPServer.HTTPServer(address, BlockchainRequestHandler)
+        thread.start_new_thread(server.serve_forever, ())
+        print "C2 HTTP server started at %s:%u" % address
+
+        try:
+            while 1:
+                time.sleep(0.001)
+        except KeyboardInterrupt:
+            server.shutdown()
+            server.server_close()
 
     def validate(self, trans):################
         """cross-validate a transaction"""
@@ -66,6 +83,33 @@ class Blockchain:
             if not frequencies.has_key(counter):
                 frequencies[counter] = 0
             frequencies[counter] += 1
+
+class BlockchainRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+    """a wrapper for the SimpleHTTPServer.SimpleHTTPRequestHandler class"""
+
+    def __init__(self, *args, **kwargs):
+        SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, *args,
+            **kwargs)
+
+    def do_GET(self):###########
+        """
+        wrap SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET,
+        but extract request data and categorize as needed
+        """
+        SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+        
+        request_body = self.rfile.read(int(self.headers.getheader(
+            'content-length', 0)))
+
+    def do_POST(self):###########
+        """
+        wrap SimpleHTTPServer.SimpleHTTPRequestHandler.do_POST,
+        but extract request data and categorize as needed
+        """
+        SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+        
+        request_body = self.rfile.read(int(self.headers.getheader(
+            'content-length', 0)))
 
 class Transaction:
     """
@@ -106,4 +150,4 @@ class Transaction:
 
 if __name__ == "__main__":
     nzeros = 4
-    b = Blockchain(max_hash = nzeros * '0' + (64 - nzeros) * 'f')
+    b = Blockchain("test", max_hash = nzeros * '0' + (64 - nzeros) * 'f')
