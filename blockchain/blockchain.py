@@ -20,7 +20,7 @@ class Blockchain:
     """
     the actual database (directory/server) containing transactions
 
-    this also handles nonce validation via an HTTP server
+    this also handles counter validation via an HTTP server
     """
     
     def __init__(self, directory = os.getcwd(), urls = (),
@@ -54,28 +54,28 @@ class Blockchain:
     def validate(self, trans):################
         """cross-validate a transaction"""
         best = None
-        frequencies = {} # nonce: frequency
+        frequencies = {} # counter: frequency
 
         for url in self.urls:
             try:
-                nonce = Transaction().load(urllib2.urlopen(
-                    urllib2.Request(url, str(trans))).read()).nonce
+                counter = Transaction().load(urllib2.urlopen(
+                    urllib2.Request(url, str(trans))).read()).counter
             except: # skip
                 continue
 
-            if not frequencies.has_key(nonce):
-                frequencies[nonce] = 0
-            frequencies[nonce] += 1
+            if not frequencies.has_key(counter):
+                frequencies[counter] = 0
+            frequencies[counter] += 1
 
 class Transaction:
     """
     a transaction represented as:
-        nonce + CRLF + timestamp + CRLF + data
+        counter + CRLF + timestamp + CRLF + data
     """
     
-    def __init__(self, data = '', nonce = 0, timestamp = None):
+    def __init__(self, data = '', counter = 0, timestamp = None):
         self.data = data
-        self.nonce = 0
+        self.counter = 0
 
         if not timestamp:
             timestamp = time.time()
@@ -83,18 +83,18 @@ class Transaction:
 
     def load(self, string):
         """load a transaction string into the current instance"""
-        self.nonce, string = string.split("\r\n", 1)
-        self.nonce = int(self.nonce)
+        self.counter, string = string.split("\r\n", 1)
+        self.counter = int(self.counter)
         self.timestamp, self.data = string.split("\r\n", 1)
         self.timestamp = float(self.timestamp)
 
     def prove_work(self, hash, max_hash):
-        """increment the nonce until hash(data + nonce) <= max_hash"""
+        """increment the counter until hash(data + counter) <= max_hash"""
         data = _str_as_int(str(self)) # include the timestamp
 
         while hash(_int_as_str(data)) > max_hash:
             data += 1 # minimal speed boost
-            self.nonce += 1
+            self.counter += 1
 
     def store(self, path):
         """store the transaction to a path"""
@@ -102,7 +102,7 @@ class Transaction:
             fp.write(str(self))
 
     def __str__(self):
-        return "%u\r\n%f\r\n%s" % (self.nonce, self.timestamp, self.data)
+        return "%u\r\n%f\r\n%s" % (self.counter, self.timestamp, self.data)
 
 if __name__ == "__main__":
     nzeros = 4
