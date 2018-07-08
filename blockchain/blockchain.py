@@ -25,7 +25,7 @@ class Blockchain:
     
     def __init__(self, directory = os.getcwd(), urls = (),
             hash = lambda s: hashlib.sha256(s).hexdigest(),
-            max_hash = 32 * 'f'):
+            max_hash = 64 * 'f'):
         if not os.path.exists(directory):
             os.makedirs(directory)
         self.directory = directory
@@ -90,8 +90,8 @@ class Transaction:
 
     def prove_work(self, hash, max_hash):
         """increment the counter until hash(data + counter) <= max_hash"""
-        data = _str_as_int(str(self)) # include the timestamp
-
+        data = _str_as_int('\n'.join(self.timestamp, self.data))
+        
         while hash(_int_as_str(data)) > max_hash:
             data += 1 # minimal speed boost
             self.counter += 1
