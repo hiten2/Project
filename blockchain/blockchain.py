@@ -38,13 +38,13 @@ def Blockchain_handle_connection(conn, directory = os.getcwd(),
         resource = os.path.normpath(resource)
     resource = os.path.join(directory, resource)
     
-    if not request_type in ("head", "get"):
+    if not request_type in ("get", "post"):
         not_implemented(conn)
         return
     
     if request_type == "get":
-        serve_get(conn, resource)
-    elif request_type == "head":
+        Blockchain_serve_get(conn, resource)
+    elif request_type == "post":
         serve_head(conn, resource)
     close(conn)
 
@@ -135,7 +135,7 @@ class Transaction:
 
     def prove_capacity(self, hash, max_hash):
         """increment the nonce until hash(data + nonce) <= max_hash"""
-        data = _str_as_int(self.data)
+        data = _str_as_int(str(self)) # include the timestamp
 
         while hash(_int_as_str(data)) > max_hash:
             data += 1 # minimal speed boost
@@ -150,4 +150,5 @@ class Transaction:
         return "%u\r\n%f\r\n%s" % (self.nonce, self.timestamp, self.data)
 
 if __name__ == "__main__":
-    pass
+    nzeros = 4
+    b = Blockchain(max_hash = nzeros * '0' + (64 - nzeros) * 'f')
