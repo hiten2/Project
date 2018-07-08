@@ -4,49 +4,7 @@ import sys
 import time
 import urllib2
 
-sys.path.append(os.path.realpath(__file__))
-
-import httpserver
-
-__doc__ = """a basic proof-of-capacity blockchain"""
-
-def Blockchain_handle_connection(conn, directory = os.getcwd(),
-        relative = False):
-    """handle a connection (i.e. add/validate transaction strings)"""
-    request_line = []
-    
-    while not request_line or not request_line[-1] in ('', '\n'):
-        try:
-            request_line.append(conn.recv(1))
-        except socket.error:
-            if conn.gettimeout(): # the socket was unexpectedly closed
-                return
-    request_line = ''.join(request_line)
-    
-    try:
-        request_type, resource, version = request_line.split(' ', 2)
-    except ValueError:
-        bad_request(conn)
-        return
-    request_type = request_type.lower()
-    resource = resource.lstrip('/')
-
-    if '?' in resource:
-        resource = resource[:resource.find('?')]
-    
-    if not relative:
-        resource = os.path.normpath(resource)
-    resource = os.path.join(directory, resource)
-    
-    if not request_type in ("get", "post"):
-        not_implemented(conn)
-        return
-    
-    if request_type == "get":
-        Blockchain_serve_get(conn, resource)
-    elif request_type == "post":
-        serve_head(conn, resource)
-    close(conn)
+__doc__ = """a basic proof-of-work blockchain"""
 
 def _int_as_str(i):
     h = hex(i)[2:]
@@ -65,11 +23,9 @@ class Blockchain:
     this also handles nonce validation via an HTTP server
     """
     
-    def __init__(self, directory = os.getcwd(), address = ('', 80), urls = (),
+    def __init__(self, directory = os.getcwd(), urls = (),
             hash = lambda s: hashlib.sha256(s).hexdigest(),
             max_hash = 32 * 'f'):
-        self.address = address
-        
         if not os.path.exists(directory):
             os.makedirs(directory)
         self.directory = directory
@@ -79,7 +35,7 @@ class Blockchain:
 
     def add(self, trans):
         """add a transaction to the blockchain (unthreaded)"""
-        trans.prove_capacity(self.hash, self.max_hash)
+        trans.prove_work(self.hash, self.max_hash)
         trans.store(self._generate_path(trans))
 
     def _generate_path(self, trans):
@@ -91,10 +47,9 @@ class Blockchain:
         trans.load(str(timestamp))
         return trans
 
-    def serve_forever(self):
+    def serve_forever(self):##########
         """start an HTTP server which logs and verifies transactions"""
-        httpserver.handle_connection = Blockchain_handle_connection
-        httpserver.mainloop(self.directory, address = self.address)
+        pass
 
     def validate(self, trans):################
         """cross-validate a transaction"""
@@ -133,7 +88,7 @@ class Transaction:
         self.timestamp, self.data = string.split("\r\n", 1)
         self.timestamp = float(self.timestamp)
 
-    def prove_capacity(self, hash, max_hash):
+    def prove_work(self, hash, max_hash):
         """increment the nonce until hash(data + nonce) <= max_hash"""
         data = _str_as_int(str(self)) # include the timestamp
 
