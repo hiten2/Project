@@ -12,7 +12,7 @@ global BLOCKCHAIN_SINGLETON
 BLOCKCHAIN_SINGLETON = None
 
 def _int_as_str(i):
-    h = hex(i)[2:]
+    h = hex(i)[2:].rstrip('L')
 
     if len(h) % 2:
         h = '0' + h
@@ -134,7 +134,7 @@ class Transaction:
 
     def prove_work(self, hash, max_hash):
         """increment the counter until hash(data + counter) <= max_hash"""
-        data = _str_as_int('\n'.join(self.timestamp, self.data))
+        data = _str_as_int('\n'.join((str(self.timestamp), self.data)))
         
         while hash(_int_as_str(data)) > max_hash:
             data += 1 # minimal speed boost
@@ -149,5 +149,8 @@ class Transaction:
         return "%u\r\n%f\r\n%s" % (self.counter, self.timestamp, self.data)
 
 if __name__ == "__main__":
-    nzeros = 4
+    nzeros = 5
     b = Blockchain("test", max_hash = nzeros * '0' + (64 - nzeros) * 'f')
+    t = Transaction("bailey->owen")
+    b.add(t)
+    print b.get(t)
