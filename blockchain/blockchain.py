@@ -4,7 +4,49 @@ import sys
 import time
 import urllib2
 
+sys.path.append(os.path.realpath(__file__))
+
+import httpserver
+
 __doc__ = """a basic proof-of-capacity blockchain"""
+
+def Blockchain_handle_connection(conn, directory = os.getcwd(),
+        relative = False):
+    """handle a connection (i.e. validate the POSTed transaction string)"""
+    request_line = []
+    
+    while not request_line or not request_line[-1] in ('', '\n'):
+        try:
+            request_line.append(conn.recv(1))
+        except socket.error:
+            if conn.gettimeout(): # the socket was unexpectedly closed
+                return
+    request_line = ''.join(request_line)
+    
+    try:
+        request_type, resource, version = request_line.split(' ', 2)
+    except ValueError:
+        bad_request(conn)
+        return
+    request_type = request_type.lower()
+    resource = resource.lstrip('/')
+
+    if '?' in resource:
+        resource = resource[:resource.find('?')]
+    
+    if not relative:
+        resource = os.path.normpath(resource)
+    resource = os.path.join(directory, resource)
+    
+    if not request_type in ("head", "get"):
+        not_implemented(conn)
+        return
+    
+    if request_type == "get":
+        serve_get(conn, resource)
+    elif request_type == "head":
+        serve_head(conn, resource)
+    close(conn)
 
 def _int_as_str(i):
     h = hex(i)[2:]
@@ -49,7 +91,8 @@ class Blockchain:
 
     def serve_forever(self):############
         """start an HTTP server which logs and verifies transactions"""
-        pass
+        httpserver.handle_connection = Blockchain_handle_connection
+        httpserver.mainloop()
 
     def validate(self, trans):################
         """cross-validate a transaction"""
