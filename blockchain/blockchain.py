@@ -2,7 +2,7 @@ import hashlib
 import os
 import sys
 import time
-import urllib.request, urllib.error, urllib.parse
+import urllib2
 
 __doc__ = """a basic proof-of-capacity blockchain"""
 
@@ -58,12 +58,12 @@ class Blockchain:
 
         for url in self.urls:
             try:
-                nonce = Transaction().load(urllib.request.urlopen(
-                    urllib.request.Request(url, str(trans))).read()).nonce
+                nonce = Transaction().load(urllib2.urlopen(
+                    urllib2.Request(url, str(trans))).read()).nonce
             except: # skip
                 continue
 
-            if nonce not in frequencies:
+            if not frequencies.has_key(nonce):
                 frequencies[nonce] = 0
             frequencies[nonce] += 1
 
