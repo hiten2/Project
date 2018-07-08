@@ -12,7 +12,7 @@ __doc__ = """a basic proof-of-capacity blockchain"""
 
 def Blockchain_handle_connection(conn, directory = os.getcwd(),
         relative = False):
-    """handle a connection (i.e. validate the POSTed transaction string)"""
+    """handle a connection (i.e. add/validate transaction strings)"""
     request_line = []
     
     while not request_line or not request_line[-1] in ('', '\n'):
@@ -65,9 +65,11 @@ class Blockchain:
     this also handles nonce validation via an HTTP server
     """
     
-    def __init__(self, directory = os.getcwd(), urls = (),
+    def __init__(self, directory = os.getcwd(), address = ('', 80), urls = (),
             hash = lambda s: hashlib.sha256(s).hexdigest(),
             max_hash = 32 * 'f'):
+        self.address = address
+        
         if not os.path.exists(directory):
             os.makedirs(directory)
         self.directory = directory
@@ -89,10 +91,10 @@ class Blockchain:
         trans.load(str(timestamp))
         return trans
 
-    def serve_forever(self):############
+    def serve_forever(self):
         """start an HTTP server which logs and verifies transactions"""
         httpserver.handle_connection = Blockchain_handle_connection
-        httpserver.mainloop()
+        httpserver.mainloop(self.directory, address = self.address)
 
     def validate(self, trans):################
         """cross-validate a transaction"""
