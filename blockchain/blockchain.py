@@ -1,3 +1,4 @@
+import hashlib
 import os
 import sys
 import time
@@ -17,12 +18,12 @@ def _str_as_int(s):
 
 class Blockchain:
     """
-    the actual database (directory) containing transactions
+    the actual database (directory/server) containing transactions
 
-    this also uses a Verifier to handle nonce validation
+    this also handles nonce validation via an HTTP server
     """
     
-    def __init__(self, directory = os.getcwd(),
+    def __init__(self, directory = os.getcwd(), urls = (),
             hash = lambda s: hashlib.sha256(s).hexdigest(),
             max_hash = 32 * 'f'):
         if not os.path.exists(directory):
@@ -30,6 +31,7 @@ class Blockchain:
         self.directory = directory
         self.hash = hash
         self.max_hash = max_hash
+        self.urls = urls
 
     def add(self, trans):
         """add a transaction to the blockchain (unthreaded)"""
@@ -45,9 +47,25 @@ class Blockchain:
         trans.load(str(timestamp))
         return trans
 
-    def validate(self, trans):
-        """cross-validate a transaction using a Verifier"""
+    def serve_forever(self):############
+        """start an HTTP server which logs and verifies transactions"""
         pass
+
+    def validate(self, trans):################
+        """cross-validate a transaction"""
+        best = None
+        frequencies = {} # nonce: frequency
+
+        for url in self.urls:
+            try:
+                nonce = Transaction().load(urllib2.urlopen(
+                    urllib2.Request(url, str(trans))).read()).nonce
+            except: # skip
+                continue
+
+            if not frequencies.has_key(nonce):
+                frequencies[nonce] = 0
+            frequencies[nonce] += 1
 
 class Transaction:
     """
@@ -63,12 +81,12 @@ class Transaction:
             timestamp = time.time()
         self.timestamp = timestamp
 
-    def load(self, path):
-        """load a transaction into the current instance"""
-        with open(path, "rb") as fp:
-            self.nonce = int(fp.readline().strip())
-            self.timestamp = float(fp.readline().strip())
-            self.data = fp.read()
+    def load(self, string):
+        """load a transaction string into the current instance"""
+        self.nonce, string = string.split("\r\n", 1)
+        self.nonce = int(self.nonce)
+        self.timestamp, self.data = string.split("\r\n", 1)
+        self.timestamp = float(self.timestamp)
 
     def prove_capacity(self, hash, max_hash):
         """increment the nonce until hash(data + nonce) <= max_hash"""
@@ -86,21 +104,5 @@ class Transaction:
     def __str__(self):
         return "%u\r\n%f\r\n%s" % (self.nonce, self.timestamp, self.data)
 
-class Verifier:
-    """
-    verification tool for a transaction
-
-    operates over HTTP, with a transaction payload
-    """
-
-    pass
-
 if __name__ == "__main__":
-    import hashlib
-    t = Transaction('\0')
-    hash = lambda s: hashlib.sha256(s).hexdigest()
-    offset = 2
-    max_hash = offset* '0' + (64 - offset) * 'f'
-    print max_hash
-    t.prove_capacity(hash, max_hash)
-    print t.nonce
+    pass
