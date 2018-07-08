@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import urllib2
 
 __doc__ = """a basic proof-of-capacity blockchain"""
 
@@ -15,37 +16,42 @@ def _str_as_int(s):
     return int(s.encode("hex"), 16)
 
 class Blockchain:
+    """
+    the actual database (directory) containing transactions
+
+    this also uses a Verifier to handle nonce validation
+    """
+    
     def __init__(self, directory = os.getcwd(),
             hash = lambda s: hashlib.sha256(s).hexdigest(),
             max_hash = 32 * 'f'):
+        if not os.path.exists(directory):
+            os.makedirs(directory)
         self.directory = directory
         self.hash = hash
         self.max_hash = max_hash
 
     def add(self, trans):
-        self.__enter__()
+        """add a transaction to the blockchain (unthreaded)"""
         trans.prove_capacity(self.hash, self.max_hash)
         trans.store(self._generate_path(trans))
-
-    def __enter__(self):
-        if not os.path.exists(self.directory):
-            os.makedirs(self.directory)
-        return self
-
-    def __exit__(self):
-        pass
 
     def _generate_path(self, trans):
         return os.path.join(self.directory, str(trans.timestamp))
 
     def get(self, timestamp):
+        """get a transaction from the blockchain"""
         trans = Transaction()
         trans.load(str(timestamp))
         return trans
 
+    def validate(self, trans):
+        """cross-validate a transaction using a Verifier"""
+        pass
+
 class Transaction:
     """
-    a transaction stored as:
+    a transaction represented as:
         nonce + CRLF + timestamp + CRLF + data
     """
     
@@ -69,14 +75,25 @@ class Transaction:
         data = _str_as_int(self.data)
 
         while hash(_int_as_str(data)) > max_hash:
-            data += 1 # slight efficiency boost
+            data += 1 # minimal speed boost
             self.nonce += 1
 
     def store(self, path):
         """store the transaction to a path"""
         with open(path, "wb") as fp:
-            fp.write("%u\r\n%f\r\n" % (self.nonce, self.timestamp))
-            fp.write(self.data)
+            fp.write(str(self))
+
+    def __str__(self):
+        return "%u\r\n%f\r\n%s" % (self.nonce, self.timestamp, self.data)
+
+class Verifier:
+    """
+    verification tool for a transaction
+
+    operates over HTTP, with a transaction payload
+    """
+
+    pass
 
 if __name__ == "__main__":
     import hashlib
