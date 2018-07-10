@@ -85,6 +85,7 @@ class Transaction:
         while hash(_int_as_str(data)) > max_hash:
             data += 1 # minimal speed boost
             self.counter += 1
+            print self.counter
 
     def store(self, path):
         """store the transaction to a path"""
@@ -96,7 +97,7 @@ class Transaction:
         return "%u\r\n%f\r\n%s" % (self.counter, self.timestamp, self.data)
 
 if __name__ == "__main__":
-    nzeros = 5
+    nzeros = 6
     b = Blockchain("test", max_hash = nzeros * '0' + (64 - nzeros) * 'f')
     t = Transaction("bailey->owen")
     b.add(t)

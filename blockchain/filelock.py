@@ -21,7 +21,7 @@ class FileLock:
                 raise e
         return self
 
-    def __exit__(self):
+    def __exit__(self, *exception):
         if self.locked:
             try:
                 fcntl.flock(self.fp.fileno(), fcntl.LOCK_UN)
