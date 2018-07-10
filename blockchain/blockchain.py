@@ -4,6 +4,10 @@ import sys
 import time
 import urllib2
 
+sys.path.append(os.path.realpath(__file__))
+
+import filelock
+
 __doc__ = """a basic proof-of-work blockchain"""
 
 def _int_as_str(i):
@@ -36,7 +40,7 @@ class Blockchain:
         self.urls = urls
 
     def add(self, trans):
-        """add a transaction to the blockchain (unthreaded)"""
+        """add a transaction to the blockchain"""
         trans.prove_work(self.hash, self.max_hash)
         trans.store(self._generate_path(trans))
 
@@ -85,7 +89,8 @@ class Transaction:
     def store(self, path):
         """store the transaction to a path"""
         with open(path, "wb") as fp:
-            fp.write(str(self))
+            with filelock.FileLock(fp): # synchronize writing
+                fp.write(str(self))
 
     def __str__(self):
         return "%u\r\n%f\r\n%s" % (self.counter, self.timestamp, self.data)
