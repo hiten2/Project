@@ -8,9 +8,6 @@ import urllib2
 
 __doc__ = """a basic proof-of-work blockchain"""
 
-global BLOCKCHAIN_SINGLETON
-BLOCKCHAIN_SINGLETON = None
-
 def _int_as_str(i):
     h = hex(i)[2:].rstrip('L')
 
@@ -31,9 +28,6 @@ class Blockchain:
     def __init__(self, directory = os.getcwd(), urls = (),
             hash = lambda s: hashlib.sha256(s).hexdigest(),
             max_hash = 64 * 'f'):
-        global BLOCKCHAIN_SINGLETON
-        BLOCKCHAIN_SINGLETON = self
-        
         if not os.path.exists(directory):
             os.makedirs(directory)
         self.directory = directory
