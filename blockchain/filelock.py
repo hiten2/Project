@@ -1,5 +1,7 @@
 import fcntl
 
+__doc__ = """simple file synchronization"""
+
 class FileLock:
     """
     an flock-oriented enterable for clarity

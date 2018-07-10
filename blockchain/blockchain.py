@@ -50,7 +50,10 @@ class Blockchain:
     def get(self, timestamp):
         """get a transaction from the blockchain"""
         trans = Transaction()
-        trans.load(str(timestamp))
+
+        with open(os.path.join(self.directory, str(timestamp)), "rb") as fp:
+            with filelock.FileLock(fp):
+                trans.load(fp.read())
         return trans
 
     def validate(self, trans):################
@@ -90,8 +93,9 @@ class Transaction:
     def store(self, path):
         """store the transaction to a path"""
         with open(path, "wb") as fp:
-            with filelock.FileLock(fp): # synchronize writing
+            with filelock.FileLock(fp):
                 fp.write(str(self))
+                os.fdatasync(fp.fileno()) # force data to disk before unlocking
 
     def __str__(self):
         return "%u\r\n%f\r\n%s" % (self.counter, self.timestamp, self.data)
