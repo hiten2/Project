@@ -1,7 +1,5 @@
-import BaseHTTPServer
 import hashlib
 import os
-import SimpleHTTPServer
 import sys
 import time
 import urllib2
@@ -20,10 +18,12 @@ def _str_as_int(s):
 
 class Blockchain:
     """
-    the actual database (directory/server) containing transactions
+    the actual database containing transactions
 
-    this also handles counter validation via an HTTP server
+    this also handles transaction/PoW retrieval
     """
+    #########should this beacon to a central server instead????
+    ########should transactions be accessed via ID or timestamp????
     
     def __init__(self, directory = os.getcwd(), urls = (),
             hash = lambda s: hashlib.sha256(s).hexdigest(),
@@ -49,61 +49,9 @@ class Blockchain:
         trans.load(str(timestamp))
         return trans
 
-    def serve_forever(self, address = ('', 8000)):############
-        """start an HTTP server which logs and verifies transactions"""
-        server = BaseHTTPServer.HTTPServer(address, BlockchainRequestHandler)
-        thread.start_new_thread(server.serve_forever, ())
-        print "C2 HTTP server started at %s:%u" % address
-
-        try:
-            while 1:
-                time.sleep(0.001)
-        except KeyboardInterrupt:
-            server.shutdown()
-            server.server_close()
-
     def validate(self, trans):################
         """cross-validate a transaction"""
-        best = None
-        frequencies = {} # counter: frequency
-
-        for url in self.urls:
-            try:
-                counter = Transaction().load(urllib2.urlopen(
-                    urllib2.Request(url, str(trans))).read()).counter
-            except: # skip
-                continue
-
-            if not frequencies.has_key(counter):
-                frequencies[counter] = 0
-            frequencies[counter] += 1
-
-class BlockchainRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
-    """a wrapper for the SimpleHTTPServer.SimpleHTTPRequestHandler class"""
-
-    def __init__(self, *args, **kwargs):
-        SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, *args,
-            **kwargs)
-
-    def do_GET(self):###########
-        """
-        wrap SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET,
-        but extract request data and categorize as needed
-        """
-        SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
-        
-        request_body = self.rfile.read(int(self.headers.getheader(
-            'content-length', 0)))
-
-    def do_POST(self):###########
-        """
-        wrap SimpleHTTPServer.SimpleHTTPRequestHandler.do_POST,
-        but extract request data and categorize as needed
-        """
-        SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
-        
-        request_body = self.rfile.read(int(self.headers.getheader(
-            'content-length', 0)))
+        pass
 
 class Transaction:
     """
