@@ -6,7 +6,7 @@ import urllib2
 
 sys.path.append(os.path.realpath(__file__))
 
-import filelock
+import withfile
 
 __doc__ = """a basic proof-of-work blockchain"""
 
@@ -39,7 +39,7 @@ class Blockchain:
         self.max_hash = max_hash
         self.urls = urls
 
-    def add(self, trans):
+x    def add(self, trans):
         """add a transaction to the blockchain"""
         trans.prove_work(self.hash, self.max_hash)
         trans.store(self._generate_path(trans))
@@ -52,7 +52,7 @@ class Blockchain:
         trans = Transaction()
 
         with open(os.path.join(self.directory, str(timestamp)), "rb") as fp:
-            with filelock.FileLock(fp):
+            with withfile.FileLock(fp):
                 trans.load(fp.read())
         return trans
 
@@ -99,7 +99,7 @@ class Transaction:
     def store(self, path):
         """store the transaction to a path"""
         with open(path, "wb") as fp:
-            with filelock.FileLock(fp):
+            with withfile.FileLock(fp):
                 fp.write(str(self))
                 os.fdatasync(fp.fileno()) # force data to disk before unlocking
 
