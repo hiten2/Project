@@ -82,13 +82,19 @@ class Transaction:
         self.timestamp = float(self.timestamp)
 
     def prove_work(self, hash, max_hash):
-        """increment the counter until hash(data + counter) <= max_hash"""
-        data = _str_as_int('\n'.join((str(self.timestamp), self.data)))
+        """
+        increment the counter until hash(data + counter) <= max_hash
+
+        the algorithm is as follows:
+            1. interpret the data as a base-256 integer
+            2. increment the integer and the counter until the integer's
+                hash is acceptable
+        """
+        n = _str_as_int('\n'.join((str(self.timestamp), self.data)))
         
-        while hash(_int_as_str(data)) > max_hash:
-            data += 1 # minimal speed boost
+        while hash(_int_as_str(n)) > max_hash:
             self.counter += 1
-            print self.counter
+            n += 1 # minimal speed boost
 
     def store(self, path):
         """store the transaction to a path"""
