@@ -26,8 +26,8 @@ class Blockchain:
 
     this also handles transaction/PoW retrieval
     """
-    #########should this beacon to a central server instead????
-    ########should transactions be accessed via ID or timestamp????
+    #########rethink how a transaction enters the distributed blockchain
+    ########transaction ID = hash(str(transaction))
     
     def __init__(self, directory = os.getcwd(), urls = (),
             hash = lambda s: hashlib.sha256(s).hexdigest(),
