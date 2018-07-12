@@ -26,6 +26,12 @@ class BufferedReader:
             "fp must be an open file"
         self.fp = fp
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exception):
+        pass
+
     def __iter__(self):
         return self
 
