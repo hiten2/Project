@@ -407,7 +407,11 @@ class DBEntry:
             os.makedirs(self.directory)
 
         if not isinstance(self._fp, file) or self._fp.closed:
-            self._fp = open(self.path, "a+b")
+            mode = "w+b"
+
+            if os.path.exists(self.path):
+                mode = "r+b"
+            self._fp = open(self.path, mode)
         return self
 
     def __exit__(self, *exception):
