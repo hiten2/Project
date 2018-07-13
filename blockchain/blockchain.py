@@ -63,7 +63,7 @@ x    def add(self, trans):
 class Transaction:
     """
     a transaction represented as:
-        counter + CRLF + timestamp + CRLF + data
+        counter + LF + timestamp + LF + data
     """
     
     def __init__(self, data = '', counter = 0, timestamp = None):
@@ -76,9 +76,9 @@ class Transaction:
 
     def load(self, string):
         """load a transaction string into the current instance"""
-        self.counter, string = string.split("\r\n", 1)
+        self.counter, string = string.split('\n', 1)
         self.counter = int(self.counter)
-        self.timestamp, self.data = string.split("\r\n", 1)
+        self.timestamp, self.data = string.split('\n', 1)
         self.timestamp = float(self.timestamp)
 
     def prove_work(self, hash, max_hash):
@@ -104,7 +104,7 @@ class Transaction:
                 os.fdatasync(fp.fileno()) # force data to disk before unlocking
 
     def __str__(self):
-        return "%u\r\n%f\r\n%s" % (self.counter, self.timestamp, self.data)
+        return "%u\n%f\n%s" % (self.counter, self.timestamp, self.data)
 
 if __name__ == "__main__":
     nzeros = 6
