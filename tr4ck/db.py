@@ -92,16 +92,13 @@ class DB:
     def append(self, name, data, offset = 0, whence = os.SEEK_CUR,
             truncate = False):
         """append data to an entry"""
-        new = True # must be assigned after applying the lock
-
-        with withfile.FileLock(self._fp):
-            new = not name in self
+        new = not name in self
             
-            with DBEntry(self._generate_path(name)) as entry:
-                entry.append(data, offset, whence, truncate)
+        with DBEntry(self._generate_path(name)) as entry:
+            entry.append(data, offset, whence, truncate)
 
-                if entry.new:
-                    self.register(name)
+            if entry.new:
+                self.register(name)
 
     def clean(self, filter = lambda n: True):
         """filter entries in the database file"""
@@ -117,8 +114,9 @@ class DB:
                     self.register(n)
     
     def __contains__(self, name):
-        """return whether an entry exists (unlocked)"""
-        return os.path.exists(self._generate_path(name))
+        """return whether an entry exists"""
+        with withfile.FileLock(self._fp):
+            return os.path.exists(self._generate_path(name))
 
     def __del__(self):
         self.__exit__()
@@ -182,7 +180,7 @@ class DB:
         return sorted((list(n) for n in names))
     
     def register(self, name):
-        """register a name with the database (unlocked)"""
+        """register a name with the database"""
         self.__enter__()
 
         with withfile.FileLock(self._fp):

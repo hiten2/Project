@@ -5,6 +5,10 @@ import sys
 import thread
 import time
 
+sys.path.append(os.path.realpath(__file__))
+
+import db
+
 __doc__ = """port scanning"""
 
 def _get_router_address():
@@ -32,6 +36,7 @@ def _help():
     print "scan specific ports of ADDRESSES\n" \
           "Usage: python portscanner.py [OPTIONS] [ADDRESSES]\n" \
           "OPTIONS\n" \
+          "\t-d, --directory=PATH\toptionally store into a database\n" \
           "\t-h, --help\tdisplay this text and exit\n" \
           "\t-n, --nbytes=INT\tthe number of bytes to receive\n" \
           "\t\tif a response scan\n" \
@@ -53,6 +58,8 @@ def _help():
 
 def main():
     """run the main program from sys.argv, without catching SIGINT"""
+    database = None
+    directory = None
     i = 1
     ips = []
     names = ("connect", "tcp")
@@ -68,7 +75,17 @@ def main():
         if arg.startswith("--"):
             arg = arg[2:]
 
-            if arg == "help":
+            if arg == "directory":
+                if '=' in arg:
+                    directory = arg.split('=', 1)[1]
+                else:
+                    if i == len(sys.argv) - 1:
+                        print "Argument required."
+                        _help()
+                        sys.exit()
+                    directory = sys.argv[i + 1]
+                    i += 1
+            elif arg == "help":
                 _help()
                 sys.exit()
             elif arg.startswith("nbytes"):
@@ -141,7 +158,14 @@ def main():
             arg = arg[1:]
 
             for c in arg:
-                if c == 'h':
+                if arg == 'd':
+                    if i == len(sys.argv) - 1:
+                        print "Argument required."
+                        _help()
+                        sys.exit()
+                    directory = sys.argv[i + 1]
+                    i += 1
+                elif c == 'h':
                     _help()
                     sys.exit()
                 elif c == 'n':
@@ -184,6 +208,10 @@ def main():
         elif arg:
             ips.append(arg)
         i += 1
+
+    if directory:
+        database = db.DB(directory)
+        database.__enter__()
     
     if not ips: # no addresses, so scan the router prefix subdomain
         ips = _get_router_address()
@@ -210,9 +238,14 @@ def main():
     print header
     
     for address, success, data in output:
+        _data = data
+
         if not data:
             data = ''
 
+        if database and success:
+            database[address] = data
+        
         try:
             data = data.encode("unicode-escape")
         except ValueError:
@@ -232,6 +265,9 @@ def main():
                     print "Yes\t%s:%u" % address
             else:
                 print "no\t%s:%u" % address
+
+    if database:
+        database.__exit__()
 
 def _scanclassbynames(names):
     """
