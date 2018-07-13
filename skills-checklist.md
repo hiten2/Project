@@ -13,6 +13,11 @@
       - re-entrant locks
     - shared memory
 - `Python`
+  - class functions
+    - enterables
+    - generators
+    - immutables
+    - syntactic clarifiers (e.g. `__iadd__`)
   - I/O
     - `fcntl`
   - parsing
