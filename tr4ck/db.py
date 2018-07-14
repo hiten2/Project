@@ -158,8 +158,14 @@ class DB:
         """return the hashed equivalent of a name"""
         if not isinstance(name, list) and not isinstance(name, tuple):
             name = [name]
-        return os.path.join(os.path.realpath(self.directory),
-            *[self._hash(str(n)) for n in name])
+
+        for i, n in enumerate(name):
+            n = str(n)
+            
+            if not n == None:
+                n self._hash(n)
+            name[i] = n
+        return os.path.join(os.path.realpath(self.directory), *name)
 
     def __getitem__(self, name):
         """retrieve an entry"""
