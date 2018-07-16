@@ -155,18 +155,16 @@ class DB:
                 pass
 
     def _generate_path(self, name):
-        """return the hashed equivalent of a name"""
+        """return the hashed equivalent of a name (None is evaluated as '')"""
         if not isinstance(name, list) and not isinstance(name, tuple):
             name = [name]
         else:
             name = list(name)
 
         for i, n in enumerate(name):
-            n = str(n)
-            
-            if not n == None:
-                n = self._hash(n)
-            name[i] = n
+            if n == None:
+                n = ''
+            name[i] = self._hash(n)
         return os.path.join(os.path.realpath(self.directory), *name)
 
     def __getitem__(self, name):
