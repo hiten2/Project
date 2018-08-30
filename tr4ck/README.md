@@ -5,6 +5,8 @@
 `scapy` - install via `pip install scapy` or `easy_install scapy`
 
 ## checklist
+- `tr4ckdb`
+  - structure entries so that full timestamp & class are preserved (ie. maintain deseriability)
 - `traffic`
   - database analysis
   - ~~database creation~~

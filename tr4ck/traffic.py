@@ -58,6 +58,7 @@ class Tracker:
                     print id, "stored to", self.db._generate_path(id)
                 else:
                     print id
+                print data.show2()
     
     def track(self):
         """the main function"""
