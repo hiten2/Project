@@ -9,10 +9,12 @@ thread.exit()
     -> exits the current thread
 """
 
-def space_callback(event):
-    print 1
+def callback(event):
+    print "event detected at", (event.x, event.y)
 
 window = tkinter.Tk()
 frame = tkinter.Frame(window, height = 100, width = 100)
-frame.bind("<Button1-Down>", space_callback)
+frame.bind("<Button-1>", callback)
+frame.pack()
+
 window.mainloop()
