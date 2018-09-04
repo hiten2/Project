@@ -1,4 +1,5 @@
 import os
+import pickle
 import scapy.layers
 import socket
 import sys
@@ -7,6 +8,8 @@ import time
 sys.path.append(os.path.realpath(__file__))
 
 import db
+
+__doc__ = """tracking-related databases"""
 
 def dummy(_class, *args, **kwargs):
     """create a dummy database"""
@@ -32,14 +35,20 @@ class Tr4ckDB(db.DB):
         """return the described ID for some data"""
         raise NotImplementedError()
 
+    def __getitem__(self, id):
+        return pickle.unpickle(db.DB.__getitem__(self, id))
+
     def _parse_id(self, id):
         """parse an ID string generated via self._generate_id"""
         raise NotImplementedError()
+
+    def __setitem__(self, id, data):
+        db.DB.__setitem__(self, pickle.pickle(data))
     
     def store(self, data):
         """an intelligent wrapper for self.__setitem__"""
         if self._store:
-            self[self._generate_id(data)] = str(data)
+            self[self._generate_id(data)] = data
 
 class DirectedDB(Tr4ckDB):
     """

@@ -9,7 +9,7 @@ sys.path.append(os.path.realpath(__file__))
 import inet
 import tr4ckdb
 
-doc = """network traffic tracking/analysis"""
+__doc__ = """network traffic tracking/analysis"""
 
 def filter_out_localhost(packet):
     """
