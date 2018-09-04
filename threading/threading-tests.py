@@ -34,11 +34,28 @@ class RandomBG(Callback):
         Callback.__call__(self, event)
         
         new_bg = random.choice(self.COLORS)
+
+        while new_bg == self.widget.cget("background"):
+            new_bg = random.choice(self.COLORS)
         self.widget.configure(background = new_bg)
         print "setting background to", new_bg
 
+class RandomBGWithWork(RandomBG):
+    """do some work after setting the background color"""
+
+    def __init__(self, *args, **kwargs):
+        RandomBG.__init__(self, *args, **kwargs)
+
+    def __call__(self, event):
+        RandomBG.__call__(self, event)
+        n = random.randint(1, 10 ** 8)
+        print "doing %u iterations of work" % n
+
+        while n > 0:
+            n -= 1
+
 window = tkinter.Tk()
 frame = tkinter.Frame(window, height = 100, width = 100)
-frame.bind("<Button-1>", RandomBG(frame).__call__)
+frame.bind("<Button-1>", RandomBGWithWork(frame).__call__)
 frame.pack()
 window.mainloop()
