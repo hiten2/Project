@@ -50,6 +50,7 @@ def _help():
           "\tinit\tinitialize the database (happens with all actions)\n" \
           "\tlist\tlist all entries as unicode-escaped strings\n" \
           "\tset NAME [DATA]\tset an entry\n" \
+          "\tsize\tprint the number of unique entries\n" \
           "NAME\n" \
           "\tan entry name (a CSV string)\n" \
           "DATA\n" \
@@ -155,16 +156,26 @@ class DB:
                 pass
 
     def _generate_path(self, name):
-        """return the hashed equivalent of a name"""
+        """return the hashed equivalent of a name (None is evaluated as '')"""
         if not isinstance(name, list) and not isinstance(name, tuple):
             name = [name]
-        return os.path.join(os.path.realpath(self.directory),
-            *[self._hash(str(n)) for n in name])
+        else:
+            name = list(name)
+
+        for i, n in enumerate(name):
+            if n == None:
+                n = ''
+            name[i] = self._hash(n)
+        return os.path.join(os.path.realpath(self.directory), *name)
 
     def __getitem__(self, name):
         """retrieve an entry"""
         with DBEntry(self._generate_path(name)) as entry:
             return entry.get()
+
+    def __len__(self):
+        """return the number of unique entries"""
+        return len(self.list())
     
     def list(self):
         """return a sorted list of all the entry names"""
@@ -322,7 +333,7 @@ if __name__ == "__main__":
         
         if action in ("append", "set") and len(sys.argv) > 4:
             data = sys.argv[4]
-    elif not action in ("clean", "init", "list"):
+    elif not action in ("clean", "init", "list", "size"):
         print "Invalid action."
         _help()
         sys.exit()
@@ -348,5 +359,7 @@ if __name__ == "__main__":
             sys.stdout.flush()
     elif action == "set":
         db[name] = data
+    elif action == "size":
+        print len(db)
     # otherwise action == "init"
     db.__exit__()
