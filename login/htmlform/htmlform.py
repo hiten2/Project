@@ -37,13 +37,3 @@ class HTMLForm:
     
     def submit(self):
         pass
-
-class HTMLFormParser(HTMLParser.HTMLParser):
-    def __init__(self):
-        HTMLParser.HTMLParser.__init__(self)
-
-    def handle_startendtag(self, tag, attrs):
-        pass
-
-    def handle_starttag(self, tag, attrs):
-        pass
