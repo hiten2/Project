@@ -241,7 +241,7 @@ def main():
         _data = data
 
         if not data:
-            data = ''
+            data = ""
 
         if database and success:
             database[address] = data

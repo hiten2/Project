@@ -24,7 +24,7 @@ class ConfFlavor:
     """
     rudimentary flavor for a configuration file
 
-    note that when a comment evaluates to False (False, None, '', 0),
+    note that when a comment evaluates to False (False, None, "", 0),
     we assume there are no comments
     """
 
@@ -118,7 +118,7 @@ class Conf(dict):
         """load from path"""
         if not self.flavor or not self.path:
             raise ValueError("invalid flavor and/or path attribute")
-        data = ''
+        data = ""
         
         with open(self.path, "rb") as fp:
             fcntl.flock(fp.fileno(), fcntl.LOCK_EX)

@@ -45,7 +45,7 @@ def whois(domain, server = SERVERS[0], timeout = None):
             data.append(sock.recv(1024))
         except socket.error:
             pass
-    data = ''.join(data)
+    data = "".join(data)
     
     try:
         sock.close()
@@ -56,7 +56,7 @@ def whois(domain, server = SERVERS[0], timeout = None):
 class Response(list):
     """a basic WHOIS response"""
 
-    def __init__(self, response = ''):
+    def __init__(self, response = ""):
         list.__init__(self)
         
         self.empty_line = "\n\n"

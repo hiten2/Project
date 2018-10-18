@@ -19,7 +19,7 @@ def echo(sock):
         try:
             chunk = sock.recv(1024)
         except socket.error:
-            chunk = ''
+            chunk = ""
 
         if not chunk:
             failed += 1

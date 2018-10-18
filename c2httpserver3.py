@@ -25,13 +25,13 @@ def forbidden(conn):
 def handle_connection(conn, directory = os.getcwd(), relative = False):
     request_line = []
     
-    while not request_line or not request_line[-1] in ('', '\n'):
+    while not request_line or not request_line[-1] in ("", '\n'):
         try:
             request_line.append(conn.recv(1))
         except socket.error:
             if conn.gettimeout(): # the socket was unexpectedly closed
                 return
-    request_line = ''.join(request_line)
+    request_line = "".join(request_line)
     
     try:
         request_type, resource, version = request_line.split(' ', 2)
@@ -76,7 +76,7 @@ def _help():
           "\tthe port number (an integer in the range 0-65535)\n" \
           "\tdefaults to 80"
 
-def mainloop(directory = os.getcwd(), relative = False, address = ('', 80),
+def mainloop(directory = os.getcwd(), relative = False, address = ("", 80),
         backlog = 1, threaded = False):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -203,7 +203,7 @@ if __name__ == "__main__":
     backlog = 1
     directory = os.getcwd()
     i = 1
-    interface = ''
+    interface = ""
     port = 80
     relative = False
     threaded = False

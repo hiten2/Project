@@ -18,7 +18,7 @@ def execute(cmd):
         try:
             stdout.close()
         except (IOError, OSError):
-            return ''
+            return ""
     return output
 
 def mainloop():
@@ -47,7 +47,7 @@ def mainloop():
 def print_command(cmd, out):
     """print a command and its output"""
     print("\"%s\":\n\t" % cmd.replace('\"', "\\\""),
-        out.replace('\n', "\n\t"), sep = '')
+        out.replace('\n', "\n\t"), sep = "")
 
 def respond(output):
     """respond to the server"""

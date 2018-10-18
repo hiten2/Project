@@ -66,7 +66,7 @@ class Transaction:
         counter + LF + timestamp + LF + data
     """
     
-    def __init__(self, data = '', counter = 0, timestamp = None):
+    def __init__(self, data = "", counter = 0, timestamp = None):
         self.data = data
         self.counter = 0
 
