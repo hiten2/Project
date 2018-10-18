@@ -1,5 +1,5 @@
 # Copyright (C) 2018 Bailey Defino
-# <https://hiten2.github.io>
+# <https://bdefino.github.io>
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 import fcntl
 import os
 
-__doc__ = """configuration files"""
+__doc__ = "configuration files"
 
 global DEFAULT_CONF_FLAVOR
 
@@ -85,6 +85,9 @@ class Conf(dict):
         if self.autosync:
             self.write()
 
+    def __getattr__(self, key):
+        return self.__getitem__(key)
+
     def load(self, string):
         """load from a string"""
         self.clear()
@@ -125,6 +128,9 @@ class Conf(dict):
             data = fp.read()
             fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
         self.load(data)
+
+    def __setattr__(self, key, value):
+        self.__setitem__(key, value)
 
     def __setitem__(self, key, value):
         dict.__setitem__(self, key, value)
