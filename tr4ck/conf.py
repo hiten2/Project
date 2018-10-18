@@ -85,9 +85,6 @@ class Conf(dict):
         if self.autosync:
             self.write()
 
-    def __getattr__(self, key):
-        return self.__getitem__(key)
-
     def load(self, string):
         """load from a string"""
         self.clear()
@@ -128,9 +125,6 @@ class Conf(dict):
             data = fp.read()
             fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
         self.load(data)
-
-    def __setattr__(self, key, value):
-        self.__setitem__(key, value)
 
     def __setitem__(self, key, value):
         dict.__setitem__(self, key, value)
