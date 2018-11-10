@@ -65,8 +65,7 @@ class Response(list):
             self.empty_line = "\r\n\r\n"
         
         for category in response.split(self.empty_line):
-            self.append(conf.Conf(autosync = False,
-                flavor = conf.ConfFlavor(comment = '%')))
+            self.append(conf.Section(flavor = conf.ConfFlavor(comment = '%')))
             
             try:
                 self[-1].load(category)
