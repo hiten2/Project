@@ -18,29 +18,33 @@ __package__ = __name__
 import db
 from db import DB
 
-def _help():
-    print "a string-based database\n" \
-          "Usage: python db.py [OPTIONS] DIRECTORY ACTION [NAME [DATA]]\n" \
-          "OPTIONS\n" \
-          "\t-h, --help\tshow this text and exit\n" \
-          "DIRECTORY\n" \
-          "\tthe database directory\n" \
-          "ACTION\n" \
-          "\tappend NAME [DATA]\tappend data to an entry\n" \
-          "\tclean\tclean the database (if it exists)\n" \
-          "\tcontains NAME\tdetermine whether an entry exists\n" \
-          "\tdelete NAME\tdelete an entry\n" \
-          "\tget NAME\tget an entry\n" \
-          "\tinit\tinitialize the database (happens with all actions)\n" \
-          "\tlist\tlist all entries as unicode-escaped strings\n" \
-          "\tset NAME [DATA]\tset an entry\n" \
-          "\tsize\tprint the number of unique entries\n" \
-          "NAME\n" \
-          "\tan entry name (a CSV string)\n" \
-          "DATA\n" \
-          "\tentry data (a string)"
-
-def main():
+if __name__ == "__main__":
+    import csv
+    import StringIO
+    import sys
+    
+    def _help():
+        print "a string-based database\n" \
+              "Usage: python db.py [OPTIONS] DIRECTORY ACTION [NAME [DATA]]\n" \
+              "OPTIONS\n" \
+              "\t-h, --help\tshow this text and exit\n" \
+              "DIRECTORY\n" \
+              "\tthe database directory\n" \
+              "ACTION\n" \
+              "\tappend NAME [DATA]\tappend data to an entry\n" \
+              "\tclean\tclean the database (if it exists)\n" \
+              "\tcontains NAME\tdetermine whether an entry exists\n" \
+              "\tdelete NAME\tdelete an entry\n" \
+              "\tget NAME\tget an entry\n" \
+              "\tinit\tinitialize the database (happens with all actions)\n" \
+              "\tlist\tlist all entries as unicode-escaped strings\n" \
+              "\tset NAME [DATA]\tset an entry\n" \
+              "\tsize\tprint the number of unique entries\n" \
+              "NAME\n" \
+              "\tan entry name (a CSV string)\n" \
+              "DATA\n" \
+              "\tentry data (a string)"
+    
     action = None
     data = ""
     db = None
@@ -97,6 +101,3 @@ def main():
         print len(db)
     # otherwise action == "init"
     db.__exit__()
-
-if __name__ == "__main__":
-    main()
